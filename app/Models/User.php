@@ -18,6 +18,13 @@ class User extends Authenticatable implements JWTSubject
     public $incrementing = false;
     protected $keyType = 'string'; // UUIDs are strings
 
+    const ID = 'id';
+    const EMAIL = 'email';
+    const NAME = 'name';
+    const EMAIL_VERIFIED_AT = 'email_verified_at';
+    const PASSWORD = 'password';
+    const REMEMBER_TOKEN = 'remember_token';
+
     /**
      * The attributes that are mass assignable.
      *

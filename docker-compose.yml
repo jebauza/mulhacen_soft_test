@@ -4,13 +4,13 @@ services:
   # MariaDB
   mariadb:
     image: mariadb:10.11-jammy
-    container_name: '${COMPOSE_PROJECT_NAME:-base}-mariadb'
+    container_name: "${COMPOSE_PROJECT_NAME:-base}-mariadb"
     restart: always
     environment:
-      MARIADB_DATABASE: '${COMPOSE_PROJECT_NAME:-base_db}'
-      MARIADB_ROOT_PASSWORD: 'root'
-      MARIADB_USER: '${DB_USERNAME:-user_db}'
-      MARIADB_PASSWORD: '${DB_PASSWORD:-password_db}'
+      MARIADB_DATABASE: "${COMPOSE_PROJECT_NAME:-base_db}"
+      MARIADB_ROOT_PASSWORD: "root"
+      MARIADB_USER: "${DB_USERNAME:-user_db}"
+      MARIADB_PASSWORD: "${DB_PASSWORD:-password_db}"
     ports:
       - "3306:3306"
     volumes:
@@ -21,26 +21,19 @@ services:
     build:
       context: .
       dockerfile: DockerfileBack
-    container_name: '${COMPOSE_PROJECT_NAME:-base}-back'
+    container_name: "${COMPOSE_PROJECT_NAME:-base}-back"
     volumes:
       - ./:/var/www/html
     depends_on:
       - mariadb
     environment:
-      APP_ENV: local
       APP_KEY: base64:SOaiLc+IPWLaRKO2U5YghzjJZoo3wxkH3UCVSy3J+TY=
-      DB_CONNECTION: mysql
-      DB_HOST: mariadb
-      DB_PORT: 3306
-      DB_DATABASE: '${COMPOSE_PROJECT_NAME:-base_db}'
-      DB_USERNAME: '${DB_USERNAME:-user_db}'
-      DB_PASSWORD: '${DB_PASSWORD:-password_db}'
     command: /bin/bash -c "chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache && php-fpm"
 
   # Nginx para servir Laravel
   nginx:
     image: nginx:alpine
-    container_name: '${COMPOSE_PROJECT_NAME:-base}-nginx'
+    container_name: "${COMPOSE_PROJECT_NAME:-base}-nginx"
     ports:
       - "8080:80"
     volumes:
@@ -48,7 +41,6 @@ services:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - backserver
-
 
 volumes:
   laravel12_db_data:

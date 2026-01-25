@@ -51,6 +51,8 @@ class AppInitCommand extends Command
         if ($this->option('seed') || $this->option('all')) {
             $this->runFakeDataSeeders();
         }
+
+        $this->createDataBaseTesting();
     }
 
     private function runRequiredSeeders(): void
@@ -61,6 +63,15 @@ class AppInitCommand extends Command
     private function runFakeDataSeeders(): void
     {
         $this->call(self::DB_SEED, ['class' => UserFakeSeeder::class]);
+    }
+
+    private function createDataBaseTesting(): void
+    {
+        DB::connection('mysql_server')->statement(
+            "CREATE DATABASE IF NOT EXISTS testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+        );
+
+        $this->info("Testing database created");
     }
 
     private function runQueries(array $queries): void
