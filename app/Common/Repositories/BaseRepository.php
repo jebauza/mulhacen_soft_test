@@ -29,6 +29,11 @@ abstract class BaseRepository
         return $this->model->find($id);
     }
 
+    public function findOneBy(string $column, string $value)
+    {
+        return $this->model->firstWhere($column, $value);
+    }
+
     public function findWithRelations(string $id, array $relations)
     {
         return $this->model->with($relations)->find($id);

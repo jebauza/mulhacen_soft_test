@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Api;
 
-use App\Models\User;
+use App\Modules\User\Models\User;
 use Database\Seeders\UserFakeSeeder;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
@@ -16,7 +16,7 @@ abstract class ApiTestCase extends BaseTestCase
     {
         parent::setUp();
 
-        $this->seed(UserFakeSeeder::class);
+        // $this->seed(UserFakeSeeder::class);
     }
 
     protected function superAdminEmail(): string
@@ -39,5 +39,19 @@ abstract class ApiTestCase extends BaseTestCase
     {
         $this->AccessToken ??= JWTAuth::fromUser($user);
         return $this->AccessToken;
+    }
+
+    protected function assertEndpointRequiresAuth(string $method, string $api, array $data = []): void
+    {
+        $this->json(strtoupper($method), $api, $data, [
+            'Authorization' => 'Bearer invalid_token',
+        ])
+            ->assertStatus(401)
+            ->assertJson([
+                'message' => __('Unauthorized'),
+                'errors' => [
+                    'auth' => [__('Authentication token is invalid or expired')],
+                ],
+            ]);
     }
 }

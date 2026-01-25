@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Api\Auth;
 
-use App\Models\User;
+use App\Modules\User\Models\User;
 use Tests\Feature\Api\ApiTestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -11,32 +11,35 @@ class MeApiTest extends ApiTestCase
     use RefreshDatabase;
 
     private $api = 'api/auth/me';
+    private User $user;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->user = User::factory()
+            ->withPassword('12345678')
+            ->create();
+    }
 
     public function test_me_200()
     {
-        $user = $this->superAdmin();
-        $token = $this->getAccessToken($user);
+        $token = $this->getAccessToken($this->user);
 
         $this->withHeaders(['Authorization' => "Bearer {$token}",])
             ->getJson($this->api)
             ->assertOk()
             ->assertJson([
-                'id' => $user->{User::ID},
-                'name' => $user->{User::NAME},
-                'email' => $user->{User::EMAIL},
-                'email_verified_at' => $user->{User::EMAIL_VERIFIED_AT}->toJson(),
-                'created_at' => $user->{User::CREATED_AT}->toJson(),
-                'updated_at' => $user->{User::UPDATED_AT}->toJson(),
+                'message' => __('OK'),
+                'data' => [
+                    'id' => $this->user->{User::ID},
+                    'name' => $this->user->{User::NAME},
+                    'email' => $this->user->{User::EMAIL},
+                ],
             ]);
     }
 
-    public function test_me_with_invalid_token_401()
+    public function test_me_invalid_token_401()
     {
-        $this->withHeaders(['Authorization' => 'Bearer invalid_token',])
-            ->getJson($this->api)
-            ->assertStatus(401)
-            ->assertJson([
-                'error' => 'Unauthorized',
-            ]);
+        $this->assertEndpointRequiresAuth('get', $this->api);
     }
 }

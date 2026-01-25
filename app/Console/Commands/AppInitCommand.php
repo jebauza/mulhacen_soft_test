@@ -31,6 +31,11 @@ class AppInitCommand extends Command
     {
         $this->info("* {$this->signature}");
 
+        $this->call('config:clear');
+        $this->call('cache:clear');
+        $this->call('clear-compiled');
+        $this->call('queue:restart');
+
         if ($this->option('initdb') || $this->option('all')) {
             $this->initDatabase();
         }

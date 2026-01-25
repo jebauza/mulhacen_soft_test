@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Auth;
 
+use App\Modules\User\Models\User;
 use Tests\Feature\Api\ApiTestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -10,11 +11,19 @@ class LogoutApiTest extends ApiTestCase
     use RefreshDatabase;
 
     private $api = 'api/auth/logout';
+    private User $user;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->user = User::factory()
+            ->withPassword('12345678')
+            ->create();
+    }
 
     public function test_logout_200()
     {
-        $user = $this->superAdmin();
-        $token = $this->getAccessToken($user);
+        $token = $this->getAccessToken($this->user);
 
         $this->withHeaders(['Authorization' => "Bearer {$token}",])
             ->postJson($this->api)
@@ -28,13 +37,8 @@ class LogoutApiTest extends ApiTestCase
             ->assertStatus(401);
     }
 
-    public function test_refresh_with_invalid_token_401()
+    public function test_refresh_invalid_token_401()
     {
-        $this->withHeaders(['Authorization' => 'Bearer invalid_token',])
-            ->postJson($this->api)
-            ->assertStatus(401)
-            ->assertJson([
-                'error' => 'Unauthorized',
-            ]);
+        $this->assertEndpointRequiresAuth('post', $this->api);
     }
 }

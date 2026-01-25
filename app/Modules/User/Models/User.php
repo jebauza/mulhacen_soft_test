@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Models;
+namespace App\Modules\User\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Database\Factories\UserFactory;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
@@ -14,7 +15,10 @@ class User extends Authenticatable implements JWTSubject
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasUuids;
 
-    protected $primaryKey = 'id'; // Or your UUID column name
+    const TABLE = 'users';
+
+    protected $table = self::TABLE;
+    protected $primaryKey = self::ID; // Or your UUID column name
     public $incrementing = false;
     protected $keyType = 'string'; // UUIDs are strings
 
@@ -31,9 +35,9 @@ class User extends Authenticatable implements JWTSubject
      * @var list<string>
      */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        self::EMAIL,
+        self::NAME,
+        self::PASSWORD,
     ];
 
     /**
@@ -42,8 +46,8 @@ class User extends Authenticatable implements JWTSubject
      * @var list<string>
      */
     protected $hidden = [
-        'password',
-        'remember_token',
+        self::PASSWORD,
+        self::REMEMBER_TOKEN,
     ];
 
     /**
@@ -54,9 +58,14 @@ class User extends Authenticatable implements JWTSubject
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            self::EMAIL_VERIFIED_AT => 'datetime',
+            self::PASSWORD => 'hashed', // Laravel handles Hash::make() automatically
         ];
+    }
+
+    protected static function newFactory()
+    {
+        return UserFactory::new();
     }
 
     /**
