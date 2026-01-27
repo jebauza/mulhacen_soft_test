@@ -4,7 +4,6 @@ use App\Common\Responses\ApiResponse;
 use App\Http\Middleware\JwtMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Request;
-use App\Http\Middleware\ForceJsonResponse;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Foundation\Configuration\Exceptions;

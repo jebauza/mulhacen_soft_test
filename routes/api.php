@@ -22,6 +22,12 @@ Route::middleware('api')->group(function () {
     });
 
     Route::middleware('auth:api')->group(function () {
-        Route::apiResource('users', UserApiController::class);
+        // Users routes
+        Route::name('')->group(function () {
+            Route::get('/users/paginate', [UserApiController::class, 'paginate'])->name('users.paginate');
+            Route::get('/users/offset-paginate', [UserApiController::class, 'offsetPaginate'])->name('users.offset-paginate');
+            Route::get('/users/cursor-paginate', [UserApiController::class, 'cursorPaginate'])->name('users.cursor-paginate');
+            Route::apiResource('users', UserApiController::class);
+        });
     });
 });

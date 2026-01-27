@@ -5,7 +5,6 @@ namespace Tests\Feature\Api\Auth;
 use Illuminate\Support\Str;
 use App\Modules\User\Models\User;
 use Tests\Feature\Api\ApiTestCase;
-use App\Modules\User\Repositories\UserRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class RegisterApiTest extends ApiTestCase
@@ -14,12 +13,10 @@ class RegisterApiTest extends ApiTestCase
 
     private $api = 'api/auth/register';
     private array $payload = [];
-    protected UserRepository $userRepo;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->userRepo = new UserRepository(new User);
 
         $this->payload = [
             'name' => 'Test',

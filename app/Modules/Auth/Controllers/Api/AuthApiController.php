@@ -29,7 +29,7 @@ class AuthApiController extends ApiController
      *{"message":"User registered successfully","data":{"access_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXBpL2F1dGgvcmVnaXN0ZXIiLCJpYXQiOjE3NjkzNjQyODcsImV4cCI6MTc2OTM2Nzg4NywibmJmIjoxNzY5MzY0Mjg3LCJqdGkiOiJZY3F5SUVVRlQ1emc3UXpoIiwic3ViIjoiMDE5YmY2NTQtNzFiOC03MzdjLThlN2UtOTFjZmQxODJlNTVlIiwicHJ2IjoiNGE2ZTI1MmQ0OWNjMzVmOWE2ZDI4OTdmZGU0ZjkzMTQ2ZTdjODAyYyJ9.32ID2lVhf-gzKpHnPYXBCCeHdaN0oLDWMiX2oPL_bsE","token_type":"bearer","expires_in":3600,"expires_at":"2026-01-25 19:04:47","user":{"id":"019bf654-71b8-737c-8e7e-91cfd182e55e","name":"jorge Ernesto","email":"jebauza1989@gmail.com"}}}
      * ```
      *
-     * **422 Unprocessable Content**
+     * **422 Unprocessable Entity**
      * ```json
      *{"message":"Validation errors","errors":{"email":["The email field is required."],"name":["The name field is required."]}}
      * ```
@@ -84,7 +84,7 @@ class AuthApiController extends ApiController
      *{"message":"These credentials do not match our records."}
      * ```
      *
-     * **422 Unprocessable Content**
+     * **422 Unprocessable Entity**
      * ```json
      *{"message":"Validation errors","errors":{"email":["The email field is required."],"password":["The password field is required."]}}
      * ```
@@ -160,8 +160,7 @@ class AuthApiController extends ApiController
             return ApiResponse::InternalServerError();
         }
 
-        return ApiResponse::success(
-            __('OK'),
+        return ApiResponse::successData(
             $user->only(User::ID, User::NAME, User::EMAIL)
         );
     }
@@ -198,8 +197,7 @@ class AuthApiController extends ApiController
     {
         $token = Auth::refresh();
 
-        return ApiResponse::success(
-            __('OK'),
+        return ApiResponse::successData(
             $this->getDataToken($token)
         );
     }
