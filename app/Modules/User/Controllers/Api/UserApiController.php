@@ -3,11 +3,15 @@
 namespace App\Modules\User\Controllers\Api;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use App\Common\Responses\ApiResponse;
+use App\Modules\User\DTOs\CreateUserDTO;
 use App\Common\Controllers\ApiController;
 use Illuminate\Support\Facades\Validator;
 use App\Modules\User\Services\UserService;
 use App\Modules\User\Resources\UserResource;
+use App\Modules\User\Requests\StoreUserRequest;
 
 class UserApiController extends ApiController
 {
@@ -26,9 +30,52 @@ class UserApiController extends ApiController
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    /**
+     * @lrd:start
+     *
+     * **Set Global Headers**
+     * ```json
+     *{"Authorization": "Bearer <access_token>", "Content-Type": "application/json", "Accept": "application/json"}
+     * ```
+     *
+     * **201 Created**
+     * ```json
+     *{"message":"Created","data":{"id":"019c000b-1ba8-734c-87c0-51ad16ba7d68","name":"Test Test","email":"test@test.com"}}
+     * ```
+     *
+     * **401 Unauthorized**
+     * ```json
+     *{"message":"Unauthorized","errors":{"auth":["Authentication token is invalid or expired"]}}
+     * ```
+     *
+     * **422 Unprocessable Entity**
+     * ```json
+     *{"message":"Validation errors","errors":{"email":["The email field is required."],"name":["The name field is required."],"password":["The password field is required."]}}
+     * ```
+     *
+     * **500 Internal Server Error**
+     * ```json
+     *{"message":"Internal Server Error"}
+     * ```
+     *
+     * @lrd:end
+     *
+     * @LRDresponses 201|401|422|500
+     */
+    public function store(StoreUserRequest $request): JsonResponse
     {
-        dd('store');
+        $createUserDTO = CreateUserDTO::fromRequest($request);
+
+        try {
+            DB::beginTransaction();
+            $user = $this->userService->createUser($createUserDTO);
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return ApiResponse::InternalServerError();
+        }
+
+        return ApiResponse::created(new UserResource($user));
     }
 
     /**
@@ -102,7 +149,7 @@ class UserApiController extends ApiController
      *
      * @LRDresponses 200|401|422|500
      */
-    public function paginate(Request $request)
+    public function paginate(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'search' => 'nullable|string',
@@ -174,7 +221,7 @@ class UserApiController extends ApiController
      *
      * @LRDresponses 200|401|422|500
      */
-    public function offsetPaginate(Request $request)
+    public function offsetPaginate(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'search' => 'nullable|string',
@@ -242,7 +289,7 @@ class UserApiController extends ApiController
      *
      * @LRDresponses 200|401|422|500
      */
-    public function cursorPaginate(Request $request)
+    public function cursorPaginate(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'search' => 'nullable|string',

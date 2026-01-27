@@ -15,9 +15,21 @@ class UserService
         protected readonly UserRepository $userRepo
     ) {}
 
-    public function cursorPaginate(?string $search, int $perPage = null): CursorPaginator
+    public function paginate(?string $search, int $page = null, int $perPage = null): PagePaginationDTO
     {
-        return $this->userRepo->queryBySearch($search)->cursorPaginate($perPage ?? 100);
+        $query = $this->userRepo->queryBySearch($search);
+        $total = $query->count();
+        $page = $page ?? 1;
+        $perPage = $perPage ?? 100;
+
+        $items = $query->forPage($page, $perPage)->get();
+
+        return new PagePaginationDTO(
+            $items,
+            $total,
+            $perPage,
+            $page
+        );
     }
 
     public function offsetPaginate(?string $search, int $limit = null, int $offset = null): OffsetPaginationDTO
@@ -37,21 +49,9 @@ class UserService
         );
     }
 
-    public function paginate(?string $search, int $page = null, int $perPage = null): PagePaginationDTO
+    public function cursorPaginate(?string $search, int $perPage = null): CursorPaginator
     {
-        $query = $this->userRepo->queryBySearch($search);
-        $total = $query->count();
-        $page = $page ?? 1;
-        $perPage = $perPage ?? 100;
-
-        $items = $query->forPage($page, $perPage)->get();
-
-        return new PagePaginationDTO(
-            $items,
-            $total,
-            $perPage,
-            $page
-        );
+        return $this->userRepo->queryBySearch($search)->cursorPaginate($perPage ?? 100);
     }
 
     /* public function getUserById(string $id): User

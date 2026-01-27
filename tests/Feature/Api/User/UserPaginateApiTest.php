@@ -13,9 +13,11 @@ class UserPaginateApiTest extends ApiTestCase
     use RefreshDatabase;
 
     private $api = 'api/users/paginate';
+    private string $token;
     private array $payload = [];
     protected UserRepository $userRepo;
     private Collection $users;
+    protected User $userAuth;
 
     protected function setUp(): void
     {
@@ -25,19 +27,19 @@ class UserPaginateApiTest extends ApiTestCase
         $this->users = User::factory(10)
             ->withPassword('12345678')
             ->create();
-
+        $this->userAuth = $this->users->random();
         $this->payload = [
             'page' => 2,
             'per_page' => 5,
         ];
+        $this->token = $this->getAccessToken($this->userAuth);
     }
 
     public function test_paginate_200()
     {
-        $token = $this->getAccessToken($this->users->random());
         $total = $this->users->count();
 
-        $this->withHeaders(['Authorization' => "Bearer {$token}",])
+        $this->withHeaders(['Authorization' => "Bearer {$this->token}",])
             ->getJson($this->api)
             ->assertOk()
             ->assertJsonStructure([
@@ -50,7 +52,7 @@ class UserPaginateApiTest extends ApiTestCase
 
         // Data with payload
         $query = http_build_query($this->payload);
-        $this->withHeaders(['Authorization' => "Bearer {$token}",])
+        $this->withHeaders(['Authorization' => "Bearer {$this->token}",])
             ->getJson("{$this->api}?{$query}")
             ->assertOk()
             ->assertJsonCount($this->payload['per_page'], 'data')
@@ -64,8 +66,6 @@ class UserPaginateApiTest extends ApiTestCase
 
     public function test_paginate_search_200()
     {
-        $token = $this->getAccessToken($this->users->random());
-
         // $names = $this->users->pluck(User::NAME)->toArray();
         // $dataString = $this->getMostRepeatedSubstring($names, 2);
         $search = 'a'; /* $dataString['substring'] ?? ''; */
@@ -74,7 +74,7 @@ class UserPaginateApiTest extends ApiTestCase
         ]);
         $total = $this->userRepo->queryBySearch($search)->count();
 
-        $this->withHeaders(['Authorization' => "Bearer {$token}",])
+        $this->withHeaders(['Authorization' => "Bearer {$this->token}",])
             ->getJson("{$this->api}?{$query}")
             ->assertOk()
             ->assertJsonPath('meta.total', $total);
@@ -87,14 +87,12 @@ class UserPaginateApiTest extends ApiTestCase
 
     public function test_paginate_validation_422(): void
     {
-        $token = $this->getAccessToken($this->users->random());
-
         // Data integer
         $query = http_build_query([
             'page'  => 'not integer',
             'per_page' => 'not integer',
         ]);
-        $this->withHeaders(['Authorization' => "Bearer {$token}",])
+        $this->withHeaders(['Authorization' => "Bearer {$this->token}",])
             ->getJson("{$this->api}?{$query}")
             ->assertStatus(422)
             ->assertJsonPath('message', __('Validation errors'))
@@ -108,7 +106,7 @@ class UserPaginateApiTest extends ApiTestCase
             'page'  => 0,
             'per_page' => 0,
         ]);
-        $this->withHeaders(['Authorization' => "Bearer {$token}",])
+        $this->withHeaders(['Authorization' => "Bearer {$this->token}",])
             ->getJson("{$this->api}?{$query}")
             ->assertStatus(422)
             ->assertJsonStructure([
@@ -120,7 +118,7 @@ class UserPaginateApiTest extends ApiTestCase
         $query = http_build_query([
             'per_page' => 101,
         ]);
-        $this->withHeaders(['Authorization' => "Bearer {$token}",])
+        $this->withHeaders(['Authorization' => "Bearer {$this->token}",])
             ->getJson("{$this->api}?{$query}")
             ->assertStatus(422)
             ->assertJsonStructure([

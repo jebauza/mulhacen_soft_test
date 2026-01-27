@@ -29,20 +29,4 @@ class UserRepository extends BaseRepository
             ->orderBy(User::TABLE . '.' . User::NAME)
             ->orderBy(User::TABLE . '.' . User::ID);
     }
-
-    public function update(string $id, array $updateUserDTO): User
-    {
-        $user = User::updateOrCreate(
-            [
-                User::ID => $id
-            ],
-            [
-                User::NAME => $updateUserDTO[UpdateUserDTO::NAME],
-                User::EMAIL => $updateUserDTO[UpdateUserDTO::EMAIL],
-                User::PASSWORD => $updateUserDTO[UpdateUserDTO::PASSWORD],
-            ]
-        );
-
-        return $user;
-    }
 }

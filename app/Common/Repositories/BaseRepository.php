@@ -49,10 +49,13 @@ abstract class BaseRepository
         return $this->model->create($data);
     }
 
-    public function update(string $id, array $data)
+    public function update(Model|string $record, array $data)
     {
-        $record = $this->model->findOrFail($id);
+        if (is_string($record)) {
+            $record = $this->model->findOrFail($record);
+        }
         $record->update($data);
+
         return $record;
     }
 

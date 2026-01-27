@@ -36,7 +36,7 @@ class ApiResponse
         return self::make($code, __('OK'), $data, null, $meta);
     }
 
-    public static function created(string $message = 'Created', $data = null): JsonResponse
+    public static function created($data = null, string $message = 'Created'): JsonResponse
     {
         return self::success($message, $data, 201);
     }

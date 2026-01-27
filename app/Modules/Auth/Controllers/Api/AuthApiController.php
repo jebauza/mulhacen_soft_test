@@ -65,8 +65,8 @@ class AuthApiController extends ApiController
         );
 
         return ApiResponse::created(
-            __('User registered successfully'),
-            $data
+            $data,
+            __('User registered successfully')
         );
     }
 
