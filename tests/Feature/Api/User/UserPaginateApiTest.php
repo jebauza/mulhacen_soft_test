@@ -35,11 +35,16 @@ class UserPaginateApiTest extends ApiTestCase
         $this->token = $this->getAccessToken($this->userAuth);
     }
 
+    public function test_paginate_invalid_token_401()
+    {
+        $this->assertEndpointRequiresAuth(self::GET, $this->api);
+    }
+
     public function test_paginate_200()
     {
         $total = $this->users->count();
 
-        $this->withHeaders(['Authorization' => "Bearer {$this->token}",])
+        $this->withHeaders(['Authorization' => "Bearer {$this->token}"])
             ->getJson($this->api)
             ->assertOk()
             ->assertJsonStructure([
@@ -52,7 +57,7 @@ class UserPaginateApiTest extends ApiTestCase
 
         // Data with payload
         $query = http_build_query($this->payload);
-        $this->withHeaders(['Authorization' => "Bearer {$this->token}",])
+        $this->withHeaders(['Authorization' => "Bearer {$this->token}"])
             ->getJson("{$this->api}?{$query}")
             ->assertOk()
             ->assertJsonCount($this->payload['per_page'], 'data')
@@ -74,15 +79,10 @@ class UserPaginateApiTest extends ApiTestCase
         ]);
         $total = $this->userRepo->queryBySearch($search)->count();
 
-        $this->withHeaders(['Authorization' => "Bearer {$this->token}",])
+        $this->withHeaders(['Authorization' => "Bearer {$this->token}"])
             ->getJson("{$this->api}?{$query}")
             ->assertOk()
             ->assertJsonPath('meta.total', $total);
-    }
-
-    public function test_paginate_invalid_token_401()
-    {
-        $this->assertEndpointRequiresAuth('get', $this->api);
     }
 
     public function test_paginate_validation_422(): void
@@ -92,7 +92,7 @@ class UserPaginateApiTest extends ApiTestCase
             'page'  => 'not integer',
             'per_page' => 'not integer',
         ]);
-        $this->withHeaders(['Authorization' => "Bearer {$this->token}",])
+        $this->withHeaders(['Authorization' => "Bearer {$this->token}"])
             ->getJson("{$this->api}?{$query}")
             ->assertStatus(422)
             ->assertJsonPath('message', __('Validation errors'))
@@ -106,8 +106,7 @@ class UserPaginateApiTest extends ApiTestCase
             'page'  => 0,
             'per_page' => 0,
         ]);
-        $this->withHeaders(['Authorization' => "Bearer {$this->token}",])
-            ->getJson("{$this->api}?{$query}")
+        $this->getJson("{$this->api}?{$query}")
             ->assertStatus(422)
             ->assertJsonStructure([
                 'message',
@@ -118,8 +117,7 @@ class UserPaginateApiTest extends ApiTestCase
         $query = http_build_query([
             'per_page' => 101,
         ]);
-        $this->withHeaders(['Authorization' => "Bearer {$this->token}",])
-            ->getJson("{$this->api}?{$query}")
+        $this->getJson("{$this->api}?{$query}")
             ->assertStatus(422)
             ->assertJsonStructure([
                 'message',

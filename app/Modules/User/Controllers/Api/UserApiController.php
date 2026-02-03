@@ -2,16 +2,19 @@
 
 namespace App\Modules\User\Controllers\Api;
 
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use App\Common\Responses\ApiResponse;
 use App\Modules\User\DTOs\CreateUserDTO;
+use App\Modules\User\DTOs\UpdateUserDTO;
 use App\Common\Controllers\ApiController;
 use Illuminate\Support\Facades\Validator;
 use App\Modules\User\Services\UserService;
 use App\Modules\User\Resources\UserResource;
 use App\Modules\User\Requests\StoreUserRequest;
+use App\Modules\User\Requests\UpdateUserRequest;
 
 class UserApiController extends ApiController
 {
@@ -22,9 +25,53 @@ class UserApiController extends ApiController
     /**
      * Display a listing of the resource.
      */
+    /**
+     * @LRDparam search nullable|string
+     *
+     * @lrd:start
+     *
+     * **Set Global Headers**
+     * ```json
+     *{"Authorization": "Bearer <access_token>", "Content-Type": "application/json", "Accept": "application/json"}
+     * ```
+     *
+     * **200 OK**
+     * ```json
+     *{"message":"OK","data":[{"id":"019bf751-c11b-73ac-8995-8f17b774a1e4","name":"Clotilde Kemmer","email":"rosalinda.miller@example.org"},{"id":"019bf751-c11c-72c0-a658-c13e432bf6e9","name":"Cody Kertzmann","email":"conner.gorczany@example.net"}]}
+     * ```
+     *
+     * **401 Unauthorized**
+     * ```json
+     *{"message":"Unauthorized","errors":{"auth":["Authentication token is invalid or expired"]}}
+     * ```
+     *
+     * **422 Unprocessable Entity**
+     * ```json
+     *{"message":"Validation errors","errors":{"search":["The search field must be a string."]}}
+     * ```
+     *
+     * **500 Internal Server Error**
+     * ```json
+     *{"message":"Internal Server Error"}
+     * ```
+     *
+     * @lrd:end
+     *
+     * @LRDresponses 200|401|422|500
+     */
     public function index(Request $request)
     {
-        dd();
+        $validator = Validator::make($request->all(), [
+            'search' => 'nullable|string',
+        ]);
+
+        if ($validator->fails())
+            return ApiResponse::validation($validator->errors()->toArray());
+
+        return ApiResponse::successData(
+            UserResource::collection($this->userService->getUsers($request->input('search'))),
+            200,
+        );
     }
 
     /**
@@ -64,16 +111,11 @@ class UserApiController extends ApiController
      */
     public function store(StoreUserRequest $request): JsonResponse
     {
-        $createUserDTO = CreateUserDTO::fromRequest($request);
+        $dto = CreateUserDTO::fromRequest($request);
 
-        try {
-            DB::beginTransaction();
-            $user = $this->userService->createUser($createUserDTO);
-            DB::commit();
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            return ApiResponse::InternalServerError();
-        }
+        $user = DB::transaction(function () use ($dto) {
+            return $this->userService->create($dto);
+        });
 
         return ApiResponse::created(new UserResource($user));
     }
@@ -89,17 +131,108 @@ class UserApiController extends ApiController
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    /**
+     * @lrd:start
+     *
+     * **Set Global Headers**
+     * ```json
+     *{"Authorization": "Bearer <access_token>", "Content-Type": "application/json", "Accept": "application/json"}
+     * ```
+     *
+     * **201 Created**
+     * ```json
+     *{"message":"Created","data":{"id":"019c000b-1ba8-734c-87c0-51ad16ba7d68","name":"Test Test","email":"test@test.com"}}
+     * ```
+     *
+     * **401 Unauthorized**
+     * ```json
+     *{"message":"Unauthorized","errors":{"auth":["Authentication token is invalid or expired"]}}
+     * ```
+     *
+     * **404 Not Found**
+     * ```json
+     *{"message":"Unauthorized","errors":{"auth":["Authentication token is invalid or expired"]}}
+     * ```
+     *
+     * **422 Unprocessable Entity**
+     * ```json
+     *{"message":"Validation errors","errors":{"email":["The email field is required."],"name":["The name field is required."],"password":["The password field is required."],"user":["Must be a valid UUID."]}}
+     * ```
+     *
+     * **500 Internal Server Error**
+     * ```json
+     *{"message":"Internal Server Error"}
+     * ```
+     *
+     * @lrd:end
+     *
+     * @LRDresponses 201|401|404|422|500
+     */
+    public function update(UpdateUserRequest $request, string $id)
     {
-        dd('update');
+        $dto = new UpdateUserDTO(...$request->validated());
+
+        $user = DB::transaction(function () use ($id, $dto) {
+            return $this->userService->update($id, $dto);
+        });
+
+        return ApiResponse::successData(
+            new UserResource($user)
+        );
     }
 
     /**
      * Remove the specified resource from storage.
      */
+    /**
+     * @lrd:start
+     *
+     * **Notes**
+     * - Requires **Access Token** obtained from **auth/login**, configuration in **auth/me**.
+     *
+     * **Description**
+     * - Remove the specified resource from storage.
+     *
+     * **200 OK**
+     * ```json
+     *{"message":"Deleted successfully"}
+     * ```
+     *
+     * **401 Unauthorized**
+     * ```json
+     *{"message":"Unauthorized","errors":{"auth":["Authentication token is invalid or expired"]}}
+     * ```
+     *
+     * **404 Not Found**
+     * ```json
+     *{"message":"Not Found","errors":{"resource":["The requested resource does not exist"]}}
+     * ```
+     *
+     * **422 Unprocessable Entity**
+     * ```json
+     *{"message":"Validation errors","errors":{"user":["Must be a valid UUID."]}}
+     * ```
+     *
+     * **500 Internal Server Error**
+     * ```json
+     *{"message":"Internal Server Error"}
+     * ```
+     *
+     * @lrd:end
+     *
+     * @LRDresponses 200|401|404|422|500
+     */
     public function destroy(string $id)
     {
-        dd('update');
+        if (!Str::isUuid($id)) {
+            return ApiResponse::validation(['user' => [__('Must be a valid UUID.')]]);
+        }
+
+        DB::transaction(function () use ($id) {
+            return $this->userService->delete($id);
+        });
+
+        return ApiResponse::success(__('Deleted successfully'));
     }
 
     /**

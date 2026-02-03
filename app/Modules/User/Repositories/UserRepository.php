@@ -3,7 +3,6 @@
 namespace App\Modules\User\Repositories;
 
 use App\Modules\User\Models\User;
-use App\Modules\User\DTOs\UpdateUserDTO;
 use Illuminate\Database\Eloquent\Builder;
 use App\Common\Repositories\BaseRepository;
 

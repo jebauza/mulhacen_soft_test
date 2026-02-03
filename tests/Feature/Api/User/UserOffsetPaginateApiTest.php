@@ -36,11 +36,16 @@ class UserOffsetPaginateApiTest extends ApiTestCase
         $this->token = $this->getAccessToken($this->userAuth);
     }
 
+    public function test_offset_paginate_invalid_token_401()
+    {
+        $this->assertEndpointRequiresAuth(self::GET, $this->api);
+    }
+
     public function test_offset_paginate_200()
     {
         $total = $this->users->count();
 
-        $this->withHeaders(['Authorization' => "Bearer {$this->token}",])
+        $this->withHeaders(['Authorization' => "Bearer {$this->token}"])
             ->getJson($this->api)
             ->assertOk()
             ->assertJsonStructure([
@@ -53,8 +58,7 @@ class UserOffsetPaginateApiTest extends ApiTestCase
 
         // Data with payload
         $query = http_build_query($this->payload);
-        $this->withHeaders(['Authorization' => "Bearer {$this->token}",])
-            ->getJson("{$this->api}?{$query}")
+        $this->getJson("{$this->api}?{$query}")
             ->assertOk()
             ->assertJsonCount($this->payload['limit'], 'data')
             ->assertJsonPath('meta', [
@@ -80,11 +84,6 @@ class UserOffsetPaginateApiTest extends ApiTestCase
             ->assertJsonPath('meta.total', $total);
     }
 
-    public function test_offset_paginate_invalid_token_401()
-    {
-        $this->assertEndpointRequiresAuth('get', $this->api);
-    }
-
     public function test_offset_paginate_validation_422(): void
     {
         // Data integer
@@ -106,8 +105,7 @@ class UserOffsetPaginateApiTest extends ApiTestCase
             'offset'  => -1,
             'limit' => 0,
         ]);
-        $this->withHeaders(['Authorization' => "Bearer {$this->token}",])
-            ->getJson("{$this->api}?{$query}")
+        $this->getJson("{$this->api}?{$query}")
             ->assertStatus(422)
             ->assertJsonStructure([
                 'message',
@@ -118,8 +116,7 @@ class UserOffsetPaginateApiTest extends ApiTestCase
         $query = http_build_query([
             'limit' => 101,
         ]);
-        $this->withHeaders(['Authorization' => "Bearer {$this->token}",])
-            ->getJson("{$this->api}?{$query}")
+        $this->getJson("{$this->api}?{$query}")
             ->assertStatus(422)
             ->assertJsonStructure([
                 'message',

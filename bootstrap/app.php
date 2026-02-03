@@ -3,12 +3,14 @@
 use App\Common\Responses\ApiResponse;
 use App\Http\Middleware\JwtMiddleware;
 use Illuminate\Foundation\Application;
-use Illuminate\Support\Facades\Request;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use App\Modules\Auth\Exceptions\LoginFailedException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -26,17 +28,32 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         //
 
-        $exceptions->renderable(function (AuthenticationException $e, $request) {
+        $exceptions->renderable(function (AuthenticationException|LoginFailedException $e, $request) {
             if ($request->is('api/*')) {
+                $errors = ['auth' => [__('Authentication token is invalid or expired')]];
+                if ($e instanceof LoginFailedException) {
+                    $errors = ['credentials' => [$e->getMessage()]];
+                }
+
                 return ApiResponse::error(
                     __('Unauthorized'),
                     401,
-                    ['auth' => [__('Authentication token is invalid or expired')]]
+                    $errors
                 );
             }
         });
 
-        $exceptions->renderable(function (ModelNotFoundException $e, $request) {
+        $exceptions->renderable(function (AuthorizationException $e, $request) {
+            if ($request->is('api/*')) {
+                return ApiResponse::error(
+                    __('Forbidden'),
+                    403,
+                    ['auth' => [__('You do not have permission to access this resource')]]
+                );
+            }
+        });
+
+        $exceptions->renderable(function (NotFoundHttpException|ModelNotFoundException $e, $request) {
             if ($request->is('api/*')) {
                 return ApiResponse::error(
                     __('Not Found'),

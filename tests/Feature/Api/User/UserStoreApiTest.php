@@ -33,6 +33,11 @@ class UserStoreApiTest extends ApiTestCase
         $this->token = $this->getAccessToken($this->userAuth);
     }
 
+    public function test_store_unauthorized_401()
+    {
+        $this->assertEndpointRequiresAuth(self::POST, $this->api, $this->payload);
+    }
+
     public function test_store_201()
     {
         $response = $this->withHeaders(['Authorization' => "Bearer {$this->token}",])
@@ -50,11 +55,6 @@ class UserStoreApiTest extends ApiTestCase
         $storeData = json_decode((new UserResource($user))->toJson(), true);
 
         $response->assertJsonPath('data', $storeData);
-    }
-
-    public function test_store_invalid_token_401()
-    {
-        $this->assertEndpointRequiresAuth('get', $this->api);
     }
 
     public function test_store_validation_422(): void

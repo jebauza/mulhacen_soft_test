@@ -7,13 +7,12 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Common\Responses\ApiResponse;
+use App\Modules\Auth\DTOs\AuthTokenDTO;
 use App\Modules\User\DTOs\CreateUserDTO;
 use App\Common\Controllers\ApiController;
 use App\Modules\Auth\Services\AuthService;
 use App\Modules\Auth\Requests\LoginRequest;
 use App\Modules\Auth\Requests\RegisterRequest;
-use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
-use PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException;
 
 class AuthApiController extends ApiController
 {
@@ -45,27 +44,14 @@ class AuthApiController extends ApiController
      */
     public function register(RegisterRequest $request): JsonResponse
     {
-        $createUserDTO = CreateUserDTO::fromRequest($request);
+        $dto = CreateUserDTO::fromRequest($request);
 
-        try {
-            DB::beginTransaction();
-
-            $user = $this->authService->register($createUserDTO);
-            $token = JWTAuth::fromUser($user);
-
-            DB::commit();
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return ApiResponse::InternalServerError();
-        }
-
-        $data = array_merge(
-            $this->getDataToken($token),
-            ['user' => $user->only(User::ID, User::NAME, User::EMAIL)]
-        );
+        DB::beginTransaction();
+        $authDTO = $this->authService->register($dto);
+        DB::commit();
 
         return ApiResponse::created(
-            $data,
+            $this->buildTokenResponse($authDTO),
             __('User registered successfully')
         );
     }
@@ -81,7 +67,7 @@ class AuthApiController extends ApiController
      *
      * **401 Unauthorized**
      * ```json
-     *{"message":"These credentials do not match our records."}
+     *{"message":"Unauthorized","errors":{"credentials":["These credentials do not match our records."]}}
      * ```
      *
      * **422 Unprocessable Entity**
@@ -100,19 +86,11 @@ class AuthApiController extends ApiController
      */
     public function login(LoginRequest $request): JsonResponse
     {
-        $credentials = $request->validated();
-
-        try {
-            if (!$token = JWTAuth::attempt($credentials) /* !$token = Auth::attempt($credentials) */) {
-                return ApiResponse::error(__('auth.failed'), 401);
-            }
-        } catch (JWTException $e) {
-            return ApiResponse::InternalServerError();
-        }
+        $authDTO = $this->authService->login($request->validated());
 
         return ApiResponse::success(
             __('Login successful'),
-            $this->getDataToken($token)
+            $this->buildTokenResponse($authDTO)
         );
     }
 
@@ -151,14 +129,7 @@ class AuthApiController extends ApiController
      */
     public function me(): JsonResponse
     {
-        try {
-            $user = Auth::user();
-            if (!$user) {
-                return ApiResponse::error(__('Not Found'), 404);
-            }
-        } catch (JWTException $e) {
-            return ApiResponse::InternalServerError();
-        }
+        $user = $this->authService->me();
 
         return ApiResponse::successData(
             $user->only(User::ID, User::NAME, User::EMAIL)
@@ -195,10 +166,10 @@ class AuthApiController extends ApiController
      */
     public function refresh()
     {
-        $token = Auth::refresh();
+        $authDTO = $this->authService->refresh();
 
         return ApiResponse::successData(
-            $this->getDataToken($token)
+            $this->buildTokenResponse($authDTO)
         );
     }
 
@@ -232,27 +203,23 @@ class AuthApiController extends ApiController
      */
     public function logout()
     {
-        try {
-            JWTAuth::invalidate(JWTAuth::getToken());
-            // Auth::logout();
-        } catch (JWTException $e) {
-            return ApiResponse::InternalServerError();
-        }
+        $this->authService->logout();
 
         return ApiResponse::success(
-            __('Successfully logged out'),
+            __('Successfully logged out')
         );
     }
 
-    protected function getDataToken($token): array
+    protected function buildTokenResponse(AuthTokenDTO $dto): array
     {
-        $expires_in_minutes = Auth::factory()->getTTL(); // auth('api')->factory()->getTTL()
+        $ttl = Auth::factory()->getTTL(); // auth('api')->factory()->getTTL()
 
         return [
-            'access_token' => $token,
+            'access_token' => $dto->token,
             'token_type' => 'bearer',
-            'expires_in' => $expires_in_minutes * 60,
-            'expires_at' => now()->addMinutes($expires_in_minutes)->toDateTimeString(),
+            'expires_in' => $ttl * 60,
+            'expires_at' => now()->addMinutes($ttl)->toDateTimeString(),
+            'user' => $dto->user->only(User::ID, User::NAME, User::EMAIL),
         ];
     }
 }

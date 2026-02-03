@@ -59,9 +59,14 @@ abstract class BaseRepository
         return $record;
     }
 
-    public function delete(string $id)
+    public function delete(Model|string $record)
     {
-        return $this->model->destroy($id);
+        if (is_string($record)) {
+            $record = $this->model->findOrFail($record);
+        }
+
+        return $record->delete();
+        // return $this->model->destroy($id);
     }
 
     public function whereIn(string $column, array $values): Collection

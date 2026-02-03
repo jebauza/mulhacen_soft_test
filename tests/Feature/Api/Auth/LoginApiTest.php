@@ -5,7 +5,6 @@ namespace Tests\Feature\Api\Auth;
 use Illuminate\Support\Str;
 use App\Modules\User\Models\User;
 use Tests\Feature\Api\ApiTestCase;
-use App\Modules\User\Repositories\UserRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class LoginApiTest extends ApiTestCase
@@ -40,6 +39,7 @@ class LoginApiTest extends ApiTestCase
                     'token_type',
                     'expires_in',
                     'expires_at',
+                    'user'
                 ]
             ]);
     }
@@ -51,7 +51,12 @@ class LoginApiTest extends ApiTestCase
             'password' => 'wrongpass',
         ])
             ->assertStatus(401)
-            ->assertJson(['message' => __('These credentials do not match our records.')]);
+            ->assertJson([
+                'message' => __('Unauthorized'),
+                'errors' => [
+                    'credentials' => [__('auth.failed')]
+                ]
+            ]);
     }
 
     public function test_login_validation_422(): void

@@ -34,9 +34,14 @@ class UserCursorPaginateApiTest extends ApiTestCase
         $this->token = $this->getAccessToken($this->userAuth);
     }
 
+    public function test_cursor_paginate_invalid_token_401()
+    {
+        $this->assertEndpointRequiresAuth(self::GET, $this->api);
+    }
+
     public function test_cursor_paginate_200()
     {
-        $this->withHeaders(['Authorization' => "Bearer {$this->token}",])
+        $this->withHeaders(['Authorization' => "Bearer {$this->token}"])
             ->getJson($this->api)
             ->assertOk()
             ->assertJsonStructure([
@@ -53,16 +58,14 @@ class UserCursorPaginateApiTest extends ApiTestCase
 
         // Data with payload
         $query = http_build_query($this->payload);
-        $response1 = $this->withHeaders(['Authorization' => "Bearer {$this->token}",])
-            ->getJson("{$this->api}?{$query}")
+        $response1 = $this->getJson("{$this->api}?{$query}")
             ->assertOk()
             ->assertJsonCount($this->payload['per_page'], 'data')
             ->assertJsonPath('meta.per_page', $this->payload['per_page'])
             ->assertJsonPath('meta.prev_cursor', null);
 
         $query = http_build_query(array_merge($this->payload, ['cursor' => $response1->json('meta.next_cursor')]));
-        $response2 = $this->withHeaders(['Authorization' => "Bearer {$this->token}",])
-            ->getJson("{$this->api}?{$query}")
+        $response2 = $this->getJson("{$this->api}?{$query}")
             ->assertOk()
             ->assertJsonCount($this->payload['per_page'], 'data')
             ->assertJsonPath('meta.per_page', $this->payload['per_page']);
@@ -90,11 +93,6 @@ class UserCursorPaginateApiTest extends ApiTestCase
         );
     }
 
-    public function test_cursor_paginate_invalid_token_401()
-    {
-        $this->assertEndpointRequiresAuth('get', $this->api);
-    }
-
     public function test_cursor_paginate_validation_422(): void
     {
         // Data integer
@@ -114,8 +112,7 @@ class UserCursorPaginateApiTest extends ApiTestCase
         $query = http_build_query([
             'per_page' => 0,
         ]);
-        $this->withHeaders(['Authorization' => "Bearer {$this->token}",])
-            ->getJson("{$this->api}?{$query}")
+        $this->getJson("{$this->api}?{$query}")
             ->assertStatus(422)
             ->assertJsonStructure([
                 'message',
@@ -126,8 +123,7 @@ class UserCursorPaginateApiTest extends ApiTestCase
         $query = http_build_query([
             'per_page' => 101,
         ]);
-        $this->withHeaders(['Authorization' => "Bearer {$this->token}",])
-            ->getJson("{$this->api}?{$query}")
+        $this->getJson("{$this->api}?{$query}")
             ->assertStatus(422)
             ->assertJsonStructure([
                 'message',

@@ -2,6 +2,7 @@
 
 namespace App\Common\Requests;
 
+use Illuminate\Support\Str;
 use App\Common\Responses\ApiResponse;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
@@ -14,5 +15,17 @@ class ApiRequest extends FormRequest
         throw new HttpResponseException(
             ApiResponse::validation($validator->errors())
         );
+    }
+
+    public function validateUuidParam(string $paramName, $validator,): void
+    {
+        $uuid = $this->route($paramName);
+
+        if (!Str::isUuid($uuid)) {
+            $validator->errors()->add(
+                $paramName,
+                __('Must be a valid UUID.')
+            );
+        }
     }
 }

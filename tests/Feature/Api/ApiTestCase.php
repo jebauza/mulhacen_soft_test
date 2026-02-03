@@ -9,6 +9,11 @@ use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class ApiTestCase extends BaseTestCase
 {
+    const GET = 'get';
+    const POST = 'post';
+    const PUT = 'put';
+    const DELETE = 'delete';
+
     protected User $superAdmin;
     protected string $AccessToken;
 
@@ -51,6 +56,20 @@ abstract class ApiTestCase extends BaseTestCase
                 'message' => __('Unauthorized'),
                 'errors' => [
                     'auth' => [__('Authentication token is invalid or expired')],
+                ],
+            ]);
+    }
+
+    protected function assertEndpointReturnsNotFound(string $method, string $api, array $data = [], string $token = ''): void
+    {
+        $this->json(strtoupper($method), $api, $data, [
+            'Authorization' => "Bearer {$token}",
+        ])
+            ->assertNotFound()
+            ->assertJson([
+                'message' => __('Not Found'),
+                'errors' => [
+                    'resource' => [__('The requested resource does not exist')],
                 ],
             ]);
     }
