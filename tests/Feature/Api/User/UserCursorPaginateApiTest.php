@@ -16,22 +16,17 @@ class UserCursorPaginateApiTest extends ApiTestCase
     private string $token;
     private array $payload = [];
     protected UserRepository $userRepo;
-    private Collection $users;
-    protected User $userAuth;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->userRepo = new UserRepository(new User);
 
-        $this->users = User::factory(10)
-            ->withPassword('12345678')
-            ->create();
-        $this->userAuth = $this->users->random();
+        $users = User::factory(5)->create();
         $this->payload = [
-            'per_page' => 5,
+            'per_page' => 2,
         ];
-        $this->token = $this->getAccessToken($this->userAuth);
+        $this->token = $this->getAccessToken($users->first());
     }
 
     public function test_cursor_paginate_invalid_token_401()
@@ -46,7 +41,13 @@ class UserCursorPaginateApiTest extends ApiTestCase
             ->assertOk()
             ->assertJsonStructure([
                 'message',
-                'data',
+                'data' => [
+                    '*' => [
+                        'id',
+                        'name',
+                        'email',
+                    ]
+                ],
                 'meta' => [
                     'per_page',
                     'next_cursor',
@@ -78,7 +79,7 @@ class UserCursorPaginateApiTest extends ApiTestCase
         // $names = $this->users->pluck(User::NAME)->toArray();
         // $dataString = $this->getMostRepeatedSubstring($names, 2);
         $search = 'a'; /* $dataString['substring'] ?? ''; */
-        $total = $this->userRepo->queryBySearch($search)->count();
+        $total = $this->userRepo->searchCount($search);
 
         $query = http_build_query(array_merge($this->payload, ['search' => $search]));
         $response = $this->withHeaders(['Authorization' => "Bearer {$this->token}",])

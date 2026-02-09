@@ -6,24 +6,21 @@ use App\Modules\User\Models\User;
 use Tests\Feature\Api\ApiTestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-class RefreshApiTest extends ApiTestCase
+class AuthRefreshApiTest extends ApiTestCase
 {
     use RefreshDatabase;
 
     private $api = 'api/auth/refresh';
-    private User $user;
 
-    protected function setUp(): void
+    public function test_refresh_unauthorized_401()
     {
-        parent::setUp();
-        $this->user = User::factory()
-            ->withPassword('12345678')
-            ->create();
+        $this->assertEndpointRequiresAuth(self::GET, $this->api);
     }
 
     public function test_refresh_200()
     {
-        $token = $this->getAccessToken($this->user);
+        $user = User::factory()->create();
+        $token = $this->getAccessToken($user);
 
         $this->withHeaders(['Authorization' => "Bearer {$token}",])
             ->getJson($this->api)
@@ -35,12 +32,18 @@ class RefreshApiTest extends ApiTestCase
                     'token_type',
                     'expires_in',
                     'expires_at',
+                    'user' => [
+                        'id',
+                        'name',
+                        'email',
+                    ]
                 ],
+            ])
+            ->assertJsonPath('message', __('OK'))
+            ->assertJsonPath('data.user', [
+                'id' => $user->{User::ID},
+                'name' => $user->{User::NAME},
+                'email' => $user->{User::EMAIL},
             ]);
-    }
-
-    public function test_refresh_invalid_token_401()
-    {
-        $this->assertEndpointRequiresAuth('get', $this->api);
     }
 }

@@ -49,6 +49,8 @@ class UserDestroyApiTest extends ApiTestCase
         $this->assertDatabaseMissing(User::TABLE, [
             User::ID => $userDeleted->{User::ID},
         ]);
+
+        // $this->assertSoftDeleted($userDeleted);
     }
 
     public function test_destroy_404()

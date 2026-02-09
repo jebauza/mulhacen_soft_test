@@ -6,24 +6,20 @@ use App\Modules\User\Models\User;
 use Tests\Feature\Api\ApiTestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-class LogoutApiTest extends ApiTestCase
+class AuthLogoutApiTest extends ApiTestCase
 {
     use RefreshDatabase;
 
     private $api = 'api/auth/logout';
-    private User $user;
 
-    protected function setUp(): void
+    public function test_logout_unauthorized_401()
     {
-        parent::setUp();
-        $this->user = User::factory()
-            ->withPassword('12345678')
-            ->create();
+        $this->assertEndpointRequiresAuth(self::POST, $this->api);
     }
 
     public function test_logout_200()
     {
-        $token = $this->getAccessToken($this->user);
+        $token = $this->getAccessToken(User::factory()->create());
 
         $this->withHeaders(['Authorization' => "Bearer {$token}",])
             ->postJson($this->api)
@@ -32,13 +28,11 @@ class LogoutApiTest extends ApiTestCase
                 'message' => 'Successfully logged out',
             ]);
 
+        // JWTAuth::unsetToken();
+        // Auth::forgetGuards();
+
         $this->withHeaders(['Authorization' => "Bearer {$token}",])
             ->postJson($this->api)
             ->assertStatus(401);
-    }
-
-    public function test_refresh_invalid_token_401()
-    {
-        $this->assertEndpointRequiresAuth('post', $this->api);
     }
 }

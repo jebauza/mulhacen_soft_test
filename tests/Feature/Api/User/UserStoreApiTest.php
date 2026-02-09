@@ -17,20 +17,18 @@ class UserStoreApiTest extends ApiTestCase
     private string $token;
     private array $payload = [];
     protected UserRepository $userRepo;
-    protected User $userAuth;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->userRepo = new UserRepository(new User);
 
-        $this->userAuth = User::factory()->create();
         $this->payload = [
             'email' => 'test@example.com',
             'name' => 'Test User',
             'password' => 'password123',
         ];
-        $this->token = $this->getAccessToken($this->userAuth);
+        $this->token = $this->getAccessToken(User::factory()->create());
     }
 
     public function test_store_unauthorized_401()
@@ -40,21 +38,36 @@ class UserStoreApiTest extends ApiTestCase
 
     public function test_store_201()
     {
-        $response = $this->withHeaders(['Authorization' => "Bearer {$this->token}",])
+        $response = $this->withHeaders(['Authorization' => "Bearer {$this->token}"])
             ->postJson($this->api, $this->payload)
             ->assertCreated()
             ->assertJsonStructure([
                 'message',
                 'data' => [
-                    'id'
-                ],
+                    'id',
+                    'name',
+                    'email',
+                ]
             ])
-            ->assertJsonPath('message', __('Created'));
+            ->assertJsonPath('message', __('Created'))
+            ->assertJsonPath('data.name', $this->payload['name'])
+            ->assertJsonPath('data.email', $this->payload['email']);
 
-        $user = $this->userRepo->findOrFail($response->json('data.id'));
-        $storeData = json_decode((new UserResource($user))->toJson(), true);
+        $this->assertDatabaseHas(User::TABLE, [
+            User::ID => $response->json('data.id'),
+            User::EMAIL => $this->payload['email'],
+            User::NAME => $this->payload['name'],
+        ]);
 
-        $response->assertJsonPath('data', $storeData);
+        $this->assertDatabaseMissing(User::TABLE, [
+            User::EMAIL => $this->payload['email'],
+            User::PASSWORD => $this->payload['password'], // Password should be hashed, so the raw value must not exist in DB
+        ]);
+
+        $user = $this->userRepo->find($response->json('data.id'));
+        $data = json_decode((new UserResource($user))->toJson(), true);
+
+        $response->assertJsonPath('data', $data);
     }
 
     public function test_store_validation_422(): void
@@ -92,7 +105,7 @@ class UserStoreApiTest extends ApiTestCase
 
         // Data unique email
         $data = $this->payload;
-        $data['email'] = $this->userAuth->{User::EMAIL};
+        $data['email'] = $this->userRepo->random()->{User::EMAIL};
         $this->postJson($this->api, $data)
             ->assertStatus(422)
             ->assertJsonStructure([

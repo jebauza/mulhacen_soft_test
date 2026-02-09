@@ -4,7 +4,7 @@ namespace Tests\Feature\Api\User;
 
 use App\Modules\User\Models\User;
 use Tests\Feature\Api\ApiTestCase;
-use Illuminate\Database\Eloquent\Collection;
+use App\Modules\User\Resources\UserResource;
 use App\Modules\User\Repositories\UserRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -16,23 +16,18 @@ class UserPaginateApiTest extends ApiTestCase
     private string $token;
     private array $payload = [];
     protected UserRepository $userRepo;
-    private Collection $users;
-    protected User $userAuth;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->userRepo = new UserRepository(new User);
 
-        $this->users = User::factory(10)
-            ->withPassword('12345678')
-            ->create();
-        $this->userAuth = $this->users->random();
+        $users = User::factory(5)->create();
         $this->payload = [
             'page' => 2,
-            'per_page' => 5,
+            'per_page' => 2,
         ];
-        $this->token = $this->getAccessToken($this->userAuth);
+        $this->token = $this->getAccessToken($users->first());
     }
 
     public function test_paginate_invalid_token_401()
@@ -42,18 +37,34 @@ class UserPaginateApiTest extends ApiTestCase
 
     public function test_paginate_200()
     {
-        $total = $this->users->count();
-
-        $this->withHeaders(['Authorization' => "Bearer {$this->token}"])
+        $response = $this->withHeaders(['Authorization' => "Bearer {$this->token}"])
             ->getJson($this->api)
             ->assertOk()
             ->assertJsonStructure([
                 'message',
-                'data',
-                'meta',
+                'data' => [
+                    '*' => [
+                        'id',
+                        'name',
+                        'email',
+                    ]
+                ],
+                'meta' => [
+                    'current_page',
+                    'per_page',
+                    'last_page',
+                    'total',
+                ],
             ])
             ->assertJsonPath('message', __('OK'))
-            ->assertJsonPath('meta.total', $total);
+            ->assertJsonPath('meta.current_page', 1);
+
+        $users = $this->userRepo->search(null, true);
+        $total = $users->count();
+        $data = json_decode((UserResource::collection($users))->toJson(), true);
+
+        $response->assertJsonPath('meta.total', $total)
+            ->assertJsonPath('data', $data);
 
         // Data with payload
         $query = http_build_query($this->payload);
@@ -62,9 +73,9 @@ class UserPaginateApiTest extends ApiTestCase
             ->assertOk()
             ->assertJsonCount($this->payload['per_page'], 'data')
             ->assertJsonPath('meta', [
-                'per_page' => $this->payload['per_page'],
                 'current_page' => $this->payload['page'],
-                'last_page' => (int) ($total / $this->payload['per_page']),
+                'per_page' => $this->payload['per_page'],
+                'last_page' => intval(ceil($total / $this->payload['per_page'])),
                 'total' => $total,
             ]);
     }
@@ -77,7 +88,7 @@ class UserPaginateApiTest extends ApiTestCase
         $query = http_build_query([
             'search' => $search,
         ]);
-        $total = $this->userRepo->queryBySearch($search)->count();
+        $total = $this->userRepo->searchCount($search);
 
         $this->withHeaders(['Authorization' => "Bearer {$this->token}"])
             ->getJson("{$this->api}?{$query}")

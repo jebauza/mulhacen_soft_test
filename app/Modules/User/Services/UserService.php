@@ -3,11 +3,9 @@
 namespace App\Modules\User\Services;
 
 use App\Modules\User\Models\User;
-use App\Common\DTOs\PagePaginationDTO;
 use App\Common\DTOs\OffsetPaginationDTO;
 use App\Modules\User\DTOs\CreateUserDTO;
 use App\Modules\User\DTOs\UpdateUserDTO;
-use Illuminate\Database\Eloquent\Collection;
 use App\Modules\User\Repositories\UserRepository;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 
@@ -17,53 +15,51 @@ class UserService
         protected readonly UserRepository $userRepo
     ) {}
 
-    public function getUsers(string $search = null): Collection
+    public function all(string $search = null)
     {
-        return $this->userRepo->queryBySearch($search)->get();
+        return $this->userRepo->search($search, true);
     }
 
-    public function paginate(?string $search, int $page = null, int $perPage = null): PagePaginationDTO
+    public function pagePaginate(?string $search = null, int $page = null, int $perPage = null)
     {
-        $query = $this->userRepo->queryBySearch($search);
-        $total = $query->count();
         $page = $page ?? 1;
         $perPage = $perPage ?? 100;
 
-        $items = $query->forPage($page, $perPage)->get();
-
-        return new PagePaginationDTO(
-            $items,
-            $total,
+        return $this->userRepo->pagination(
+            $this->userRepo->baseSearch($search, true),
+            $page,
             $perPage,
-            $page
         );
     }
 
-    public function offsetPaginate(?string $search, int $limit = null, int $offset = null): OffsetPaginationDTO
+    public function offsetPaginate(?string $search, int $offset = null, int $limit = null): OffsetPaginationDTO
     {
-        $query = $this->userRepo->queryBySearch($search);
-        $total = $query->count();
-        $limit = $limit ?? 100;
         $offset = $offset ?? 0;
+        $limit = $limit ?? 100;
 
-        $items = $query->offset($offset)->limit($limit)->get();
-
-        return new OffsetPaginationDTO(
-            $items,
-            $total,
-            $limit,
-            $offset
+        return $this->userRepo->offsetPagination(
+            $this->userRepo->baseSearch($search, true),
+            $offset,
+            $limit
         );
     }
 
     public function cursorPaginate(?string $search, int $perPage = null): CursorPaginator
     {
-        return $this->userRepo->queryBySearch($search)->cursorPaginate($perPage ?? 100);
+        $perPage = $perPage ?? 100;
+
+        return $this->userRepo->cursorPagination(
+            $this->userRepo->baseSearch($search, true),
+            $perPage
+        );
     }
 
-    public function findOrFail(string $id): User
+    public function findById(string $id): User
     {
-        return $this->userRepo->findOrFail($id);
+        /** @var User $user */
+        $user = $this->userRepo->findOrFail($id);
+
+        return $user;
     }
 
     public function create(CreateUserDTO $dto): User
@@ -73,14 +69,14 @@ class UserService
 
     public function update(string $id, UpdateUserDTO $dto): User
     {
-        $user = $this->findOrFail($id);
+        $user = $this->findById($id);
 
         return $this->userRepo->update($user, $dto->toArray());;
     }
 
     public function delete(string $id): void
     {
-        $user = $this->findOrFail($id);
+        $user = $this->findById($id);
 
         $this->userRepo->delete($user);
     }

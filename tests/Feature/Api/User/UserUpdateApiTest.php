@@ -52,19 +52,35 @@ class UserUpdateApiTest extends ApiTestCase
                 str_replace(':id', $this->userAuth->{User::ID}, $this->api),
                 $this->payload
             )
-            ->assertOk();
+            ->assertOk()
+            ->assertJsonStructure([
+                'message',
+                'data' => [
+                    'id',
+                    'name',
+                    'email',
+                ]
+            ])
+            ->assertJsonPath('message', __('OK'))
+            ->assertJsonPath('data.id', $this->userAuth->{User::ID})
+            ->assertJsonPath('data.name', $this->payload['name'])
+            ->assertJsonPath('data.email', $this->payload['email']);
 
-        $oldPasswordHash = $this->userAuth->{User::PASSWORD};
-        $updateData = json_decode((new UserResource($this->userAuth->refresh()))->toJson(), true);
+        $this->assertDatabaseHas(User::TABLE, [
+            User::ID => $response->json('data.id'),
+            User::EMAIL => $this->payload['email'],
+            User::NAME => $this->payload['name'],
+        ]);
 
-        $response->assertJson([
-            'message' => __('OK'),
-            'data' => $updateData,
-        ])
-            ->assertJsonPath('data.email', $this->payload['email'])
-            ->assertJsonPath('data.name', $this->payload['name']);
+        $this->assertDatabaseMissing(User::TABLE, [
+            User::EMAIL => $this->payload['email'],
+            User::PASSWORD => $this->payload['password'], // Password should be hashed, so the raw value must not exist in DB
+        ]);
 
-        $this->assertNotEquals($oldPasswordHash, $this->userAuth->{User::PASSWORD});
+        $user = $this->userRepo->find($response->json('data.id'));
+        $data = json_decode((new UserResource($user))->toJson(), true);
+
+        $response->assertJsonPath('data', $data);
     }
 
     public function test_update_404()
@@ -86,17 +102,16 @@ class UserUpdateApiTest extends ApiTestCase
             ->assertJsonPath('message', __('Validation errors'))
             ->assertJsonStructure([
                 'message',
-                'errors' => ['user', 'email', 'name', 'password'],
+                'errors' => ['email', 'name', 'password', 'user'],
             ]);
+
+        $api = str_replace(':id', $this->userAuth->{User::ID}, $this->api);
 
         // Data min and max
         $data = $this->payload;
         $data['name'] = Str::random(256);
         $data['password'] = Str::random(7);
-        $this->putJson(
-            str_replace(':id', $this->userAuth->{User::ID}, $this->api),
-            $data
-        )
+        $this->putJson($api, $data)
             ->assertStatus(422)
             ->assertJsonStructure([
                 'message',
@@ -106,10 +121,7 @@ class UserUpdateApiTest extends ApiTestCase
         // Data invalid email
         $data = $this->payload;
         $data['email'] = Str::random(length: 10);
-        $this->putJson(
-            str_replace(':id', $this->userAuth->{User::ID}, $this->api),
-            $data
-        )
+        $this->putJson($api, $data)
             ->assertStatus(422)
             ->assertJsonStructure([
                 'message',
@@ -119,10 +131,7 @@ class UserUpdateApiTest extends ApiTestCase
         // Data unique email
         $data = $this->payload;
         $data['email'] = $this->users->last()->{User::EMAIL};
-        $this->putJson(
-            str_replace(':id', $this->userAuth->{User::ID}, $this->api),
-            $data
-        )
+        $this->putJson($api, $data)
             ->assertStatus(422)
             ->assertJsonStructure([
                 'message',

@@ -10,12 +10,12 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 
 class ApiRequest extends FormRequest
 {
-    protected function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(
-            ApiResponse::validation($validator->errors())
-        );
-    }
+    // protected function failedValidation(Validator $validator)
+    // {
+    //     throw new HttpResponseException(
+    //         ApiResponse::validation($validator->errors())
+    //     );
+    // }
 
     public function validateUuidParam(string $paramName, $validator,): void
     {

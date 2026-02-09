@@ -14,16 +14,16 @@ abstract class ApiController
 
         if ($data instanceof PagePaginationDTO) {
             $meta = [
-                'per_page'    => $data->perPage,
-                'current_page' => $data->currentPage,
-                'last_page' => $data->lastPage,
-                'total'    => $data->total,
+                'current_page'  => $data->currentPage,
+                'per_page'      => $data->perPage,
+                'last_page'     => $data->lastPage,
+                'total'         => $data->total,
             ];
         } elseif ($data instanceof OffsetPaginationDTO) {
             $meta = [
-                'limit' => $data->limit,
-                'offset'   => $data->offset,
-                'total'    => $data->total,
+                'offset'    => $data->offset,
+                'limit'     => $data->limit,
+                'total'     => $data->total,
             ];
         } elseif ($data instanceof CursorPaginator) {
             $meta = [

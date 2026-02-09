@@ -17,7 +17,7 @@ use App\Modules\Auth\Requests\RegisterRequest;
 class AuthApiController extends ApiController
 {
     public function __construct(
-        protected readonly AuthService $authService,
+        protected readonly AuthService $service,
     ) {}
 
     /**
@@ -47,7 +47,7 @@ class AuthApiController extends ApiController
         $dto = CreateUserDTO::fromRequest($request);
 
         DB::beginTransaction();
-        $authDTO = $this->authService->register($dto);
+        $authDTO = $this->service->register($dto);
         DB::commit();
 
         return ApiResponse::created(
@@ -86,7 +86,7 @@ class AuthApiController extends ApiController
      */
     public function login(LoginRequest $request): JsonResponse
     {
-        $authDTO = $this->authService->login($request->validated());
+        $authDTO = $this->service->login($request->validated());
 
         return ApiResponse::success(
             __('Login successful'),
@@ -129,7 +129,7 @@ class AuthApiController extends ApiController
      */
     public function me(): JsonResponse
     {
-        $user = $this->authService->me();
+        $user = $this->service->me();
 
         return ApiResponse::successData(
             $user->only(User::ID, User::NAME, User::EMAIL)
@@ -166,7 +166,7 @@ class AuthApiController extends ApiController
      */
     public function refresh()
     {
-        $authDTO = $this->authService->refresh();
+        $authDTO = $this->service->refresh();
 
         return ApiResponse::successData(
             $this->buildTokenResponse($authDTO)
@@ -203,7 +203,7 @@ class AuthApiController extends ApiController
      */
     public function logout()
     {
-        $this->authService->logout();
+        $this->service->logout();
 
         return ApiResponse::success(
             __('Successfully logged out')
