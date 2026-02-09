@@ -20,7 +20,7 @@ class AppInitCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Initializes the application, runs migrations, seeds, and sets up base roles.';
+    protected $description = 'Initializes the application, runs migrations, seeds, and sets up base data.';
 
     const DB_SEED = 'db:seed';
 
