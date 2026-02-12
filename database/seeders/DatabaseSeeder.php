@@ -5,6 +5,9 @@ namespace Database\Seeders;
 use App\Modules\User\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Database\Seeders\SpecialtySeeder;
+use Database\Seeders\TreatmentSeeder;
+use Database\Seeders\DentistSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -21,5 +24,12 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+
+        // Seed specialties
+        $this->call(SpecialtySeeder::class);
+        // Seed treatments
+        $this->call(TreatmentSeeder::class);
+        // Seed dentists (requires specialties)
+        $this->call(DentistSeeder::class);
     }
 }

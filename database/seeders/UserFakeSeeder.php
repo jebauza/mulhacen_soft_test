@@ -14,14 +14,13 @@ class UserFakeSeeder extends Seeder
     public function run(): void
     {
         User::factory()->create([
-            'name' => 'superadmin',
-            'email' => 'superadmin@example.com',
-            'password' => Hash::make('123456789'),
+            'email' => 'ecepcionista@pruebasmulhacen.com',
+            'password' => Hash::make('0dHGgfh49v'),
         ]);
 
-        $users = User::factory(20)
-            ->withPassword('12345678')
-            ->create();
+        // $users = User::factory(20)
+        //     ->withPassword('12345678')
+        //     ->create();
 
         $this->command->info(self::class . ' is finished');
     }

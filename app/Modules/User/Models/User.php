@@ -4,11 +4,13 @@ namespace App\Modules\User\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
+use App\Modules\User\Models\Dentist;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -24,7 +26,6 @@ class User extends Authenticatable implements JWTSubject
 
     const ID = 'id';
     const EMAIL = 'email';
-    const NAME = 'name';
     const EMAIL_VERIFIED_AT = 'email_verified_at';
     const PASSWORD = 'password';
     const REMEMBER_TOKEN = 'remember_token';
@@ -36,7 +37,6 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $fillable = [
         self::EMAIL,
-        self::NAME,
         self::PASSWORD,
     ];
 
@@ -82,5 +82,10 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+
+    public function dentist(): HasOne
+    {
+        return $this->hasOne(Dentist::class, Dentist::USER_ID, self::ID);
     }
 }
