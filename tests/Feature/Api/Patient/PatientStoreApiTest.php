@@ -97,15 +97,15 @@ class PatientStoreApiTest extends ApiTestCase
                 'errors' => ['name', 'email', 'phone'],
             ]);
 
-        // // Name already exists DB
-        // $data = $this->payload;
-        // $data['email'] = $this->patientRepo->random()->{Patient::EMAIL};
-        // $data['phone'] = $this->patientRepo->random()->{Patient::PHONE};
-        // $this->postJson($this->api, $data)
-        //     ->assertStatus(422)
-        //     ->assertJsonStructure([
-        //         'message',
-        //         'errors' => ['email', 'phone'],
-        //     ]);
+        // Name already exists DB
+        $data = $this->payload;
+        $data['email'] = $this->patientRepo->random()->{Patient::EMAIL};
+        $data['phone'] = $this->patientRepo->random()->{Patient::PHONE};
+        $this->postJson($this->api, $data)
+            ->assertStatus(422)
+            ->assertJsonStructure([
+                'message',
+                'errors' => ['email', 'phone'],
+            ]);
     }
 }

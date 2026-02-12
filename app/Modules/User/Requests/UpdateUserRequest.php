@@ -14,12 +14,6 @@ class UpdateUserRequest extends ApiRequest
     {
         $this->userId = $this->route('user');
 
-        // if (!Str::isUuid($this->userId)) {
-        //     throw new HttpResponseException(
-        //         ApiResponse::validation(['user_id' => [__('Must be a valid UUID.')]])
-        //     );
-        // }
-
         return [
             UpdateUserDTO::EMAIL => 'required|email|unique:' . User::TABLE . ',' . User::EMAIL . ',' . $this->userId,
             UpdateUserDTO::PASSWORD => 'required|string|min:8',

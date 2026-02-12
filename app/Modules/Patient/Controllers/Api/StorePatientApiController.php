@@ -20,11 +20,11 @@ class StorePatientApiController extends ApiController
      * - Requires **Access Token** obtained from **auth/login**, configuration in **auth/me**.
      *
      * **Description**
-     * - Create a new user with the provided attributes.
+     * - Create a new patient with the provided attributes.
      *
      * **201 Created**
      * ```json
-     *{"message":"Created","data":{"id":"a106317e-889c-40f6-a8dd-cdcffb2b9886","name":"Test8","surname":"Test8","email":"test7@test.com","avatar":"http:\/\/localhost:8080\/storage\/user\/avatars\/P1NohQnOiGctG5beFqp2PIAzuWtNLPBLm1xBZBIq.jpg","phone":"622788616","type_document":"dni","n_document":"jmYYDaHRwh","birth_date":"1989-12-19","designation":"sdsdsdsdsd","gender":"female","roles":[{"id":"a1030860-2a5d-482d-b4d2-8450ea436186","name":"rol test2"}],"all_permissions":[{"id":"a103085f-d38c-4c86-a46a-79b1e5c3c419","name":"veterinary.register"}]}}
+     *{"message":"Created","data":{"id":"019c5413-829a-733c-bcf1-340c646c04f3","name":"Test Test","email":"test@test.com","phone":"622783646","notes":"prueba"}}
      * ```
      *
      * **401 Unauthorized**
@@ -39,7 +39,7 @@ class StorePatientApiController extends ApiController
      *
      * **422 Unprocessable Entity**
      * ```json
-     *{"message":"Validation errors","errors":{"email":["The email field is required."],"name":["The name field is required."],"surname":["The surname field is required."],"password":["The password field is required."]}}
+     *{"message":"Validation errors","errors":{"name":["The name field is required."],"email":["The email field is required."],"phone":["The phone field is required."]}}
      * ```
      *
      * **500 Internal Server Error**

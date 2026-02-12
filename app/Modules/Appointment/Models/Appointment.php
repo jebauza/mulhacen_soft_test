@@ -24,22 +24,24 @@ class Appointment extends Model
     const ID = 'id';
     const PATIENT_ID = 'patient_id';
     const DENTIST_ID = 'dentist_id';
-    const STAR = 'start';
+    const START = 'start';
     const END = 'end';
     const DURATION = 'duration';
+    const REASON = 'reason';
 
     protected $fillable = [
         self::PATIENT_ID,
         self::DENTIST_ID,
-        self::STAR,
+        self::START,
         self::END,
         self::DURATION,
+        self::REASON,
     ];
 
     protected function casts(): array
     {
         return [
-            self::STAR => 'datetime',
+            self::START => 'datetime',
             self::END => 'datetime',
         ];
     }

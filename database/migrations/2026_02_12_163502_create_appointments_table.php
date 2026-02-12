@@ -22,6 +22,7 @@ return new class extends Migration
             $table->dateTime('start')->index();
             $table->dateTime('end')->index();
             $table->smallInteger('duration');
+            $table->text('reason')->nullable();
 
             $table->timestamps();
 

@@ -10,6 +10,7 @@ class CreateAppointmentDTO
     const STAR = 'start';
     const END = 'end';
     const DURATION = 'duration';
+    const REASON = 'reason';
     const TREATMENT_IDS = 'treatment_ids';
 
     public function __construct(
@@ -18,6 +19,7 @@ class CreateAppointmentDTO
         public readonly string $start,
         public readonly string $end,
         public readonly int $duration,
+        public readonly ?string $reason = null,
         public readonly array $treatment_ids = []
     ) {}
 
@@ -29,6 +31,7 @@ class CreateAppointmentDTO
             self::STAR         => $this->start,
             self::END         => $this->end,
             self::DURATION         => $this->duration,
+            self::REASON         => $this->reason,
         ];
 
         if (!$onlyModel) {
@@ -46,8 +49,8 @@ class CreateAppointmentDTO
             start: $request->{self::STAR},
             end: $request->{self::END},
             duration: $request->{self::DURATION},
+            reason: $request->{self::REASON},
             treatment_ids: $request->{self::TREATMENT_IDS},
-
         );
     }
 }

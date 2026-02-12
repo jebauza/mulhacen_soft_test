@@ -1,12 +1,12 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Modules\Appointment\Controllers\Api\AppointmentScheduleApiController;
+use App\Modules\Appointment\Controllers\Api\StoreAppointmentApiController;
 use App\Modules\Auth\Controllers\Api\AuthApiController;
+use App\Modules\Patient\Controllers\Api\StorePatientApiController;
 use App\Modules\User\Controllers\Api\UserApiController;
 use App\Modules\User\Controllers\Api\UserPaginateApiController;
-use App\Modules\Patient\Controllers\Api\StorePatientApiController;
-use App\Modules\Appointment\Controllers\Api\IndexAppointmentApiController;
-use App\Modules\Appointment\Controllers\Api\StoreAppointmentApiController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return response()->json(['message' => 'Hello world!']);
@@ -40,6 +40,6 @@ Route::middleware('api')->group(function () {
 
         // Appointments
         Route::post('/appointments', StoreAppointmentApiController::class)->name('appointments.store');
-        Route::get('/appointments/days', IndexAppointmentApiController::class)->name('appointments.index');
+        Route::get('/appointments/schedule', AppointmentScheduleApiController::class)->name('appointments.schedule');
     });
 });

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('dentists', function (Blueprint $table) {
             $table->uuid('id')->primary();
 
-            $table->uuid('user_id')->nullable()->index();
+            $table->uuid('user_id')->nullable()->unique();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('SET NULL');
 
             $table->string('name');

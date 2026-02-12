@@ -3,11 +3,11 @@
 namespace App\Modules\Appointment\Requests;
 
 use App\Common\Requests\ApiRequest;
-use App\Modules\User\Models\Dentist;
+use App\Modules\Appointment\DTOs\CreateAppointmentDTO;
 use App\Modules\Patient\Models\Patient;
 use App\Modules\Treatment\Models\Treatment;
-use App\Modules\Appointment\DTOs\CreateAppointmentDTO;
-use App\Modules\Appointment\Repositories\AppointmentRepository;
+use App\Modules\Treatment\Repositories\TreatmentRepository;
+use App\Modules\User\Models\Dentist;
 
 class StoreAppointmentRequest extends ApiRequest
 {
@@ -19,8 +19,9 @@ class StoreAppointmentRequest extends ApiRequest
             CreateAppointmentDTO::STAR => 'required|date_format:Y-m-d H:i:s',
             CreateAppointmentDTO::END => 'required|date_format:Y-m-d H:i:s',
             CreateAppointmentDTO::DURATION => 'required|integer',
+            CreateAppointmentDTO::REASON => 'nullable|string',
 
-            CreateAppointmentDTO::TREATMENT_IDS => 'present|array',
+            CreateAppointmentDTO::TREATMENT_IDS => 'present|array|min:1',
             CreateAppointmentDTO::TREATMENT_IDS . '.*' => 'uuid',
         ];
     }
@@ -36,7 +37,8 @@ class StoreAppointmentRequest extends ApiRequest
 
     public function checkTreatment($validator): void
     {
-        $validIds = Treatment::whereIn(Treatment::ID, $this->{CreateAppointmentDTO::TREATMENT_IDS})->pluck(Treatment::ID);
+        $treatmentRepo = app(TreatmentRepository::class);
+        $validIds = $treatmentRepo->whereIn(Treatment::ID, $this->{CreateAppointmentDTO::TREATMENT_IDS})->pluck(Treatment::ID);
         $notValidIds = collect($this->{CreateAppointmentDTO::TREATMENT_IDS})->diff($validIds);
 
         foreach ($notValidIds as $key => $id) {

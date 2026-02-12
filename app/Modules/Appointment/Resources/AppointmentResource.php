@@ -14,9 +14,11 @@ class AppointmentResource extends JsonResource
             'id' => $this->{Appointment::ID},
             'patient_id' => $this->{Appointment::PATIENT_ID},
             'dentist_id' => $this->{Appointment::DENTIST_ID},
-            'start' => $this->{Appointment::STAR},
-            'end' => $this->{Appointment::END},
+            'start' => $this->{Appointment::START}->toDateTimeString(),
+            'end' => $this->{Appointment::END}->toDateTimeString(),
             'duration' => $this->{Appointment::DURATION},
+            'reason' => $this->{Appointment::REASON},
+
             'treatment_ids' => $this->treatments()->pluck('id'),
         ];
     }
