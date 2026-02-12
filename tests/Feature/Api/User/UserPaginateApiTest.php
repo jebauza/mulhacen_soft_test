@@ -45,7 +45,6 @@ class UserPaginateApiTest extends ApiTestCase
                 'data' => [
                     '*' => [
                         'id',
-                        'name',
                         'email',
                     ]
                 ],

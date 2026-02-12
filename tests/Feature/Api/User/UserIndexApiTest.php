@@ -41,7 +41,6 @@ class UserIndexApiTest extends ApiTestCase
                 'data' => [
                     '*' => [
                         'id',
-                        'name',
                         'email',
                     ]
                 ],

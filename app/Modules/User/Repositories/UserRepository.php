@@ -18,8 +18,7 @@ class UserRepository extends BaseRepository
     {
         /** @var Builder $builder */
         $builder = User::when(filled($search), function (Builder $q) use ($search) {
-            $q->where(User::NAME, 'LIKE', "%{$search}%")
-                ->orWhere(User::EMAIL, 'LIKE', "%{$search}%");
+            $q->where(User::EMAIL, 'LIKE', "%{$search}%");
         })
             ->when($relations, function (Builder $q) use ($relations) {
                 if (is_array($relations)) {
@@ -28,7 +27,7 @@ class UserRepository extends BaseRepository
                     // TODO: Define default relations to load when $relations is true
                 }
             })
-            ->orderBy(User::TABLE . '.' . User::NAME)
+            ->orderBy(User::TABLE . '.' . User::EMAIL)
             ->orderBy(User::TABLE . '.' . User::ID);
 
         return $builder;

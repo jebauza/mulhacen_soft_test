@@ -30,7 +30,6 @@ class UserUpdateApiTest extends ApiTestCase
         $this->userAuth = $this->users->first();
         $this->payload = [
             'email' => 'test@example.com',
-            'name' => 'Test User',
             'password' => 'password123',
         ];
         $this->token = $this->getAccessToken($this->userAuth);
@@ -57,19 +56,16 @@ class UserUpdateApiTest extends ApiTestCase
                 'message',
                 'data' => [
                     'id',
-                    'name',
                     'email',
                 ]
             ])
             ->assertJsonPath('message', __('OK'))
             ->assertJsonPath('data.id', $this->userAuth->{User::ID})
-            ->assertJsonPath('data.name', $this->payload['name'])
             ->assertJsonPath('data.email', $this->payload['email']);
 
         $this->assertDatabaseHas(User::TABLE, [
             User::ID => $response->json('data.id'),
             User::EMAIL => $this->payload['email'],
-            User::NAME => $this->payload['name'],
         ]);
 
         $this->assertDatabaseMissing(User::TABLE, [
@@ -102,20 +98,19 @@ class UserUpdateApiTest extends ApiTestCase
             ->assertJsonPath('message', __('Validation errors'))
             ->assertJsonStructure([
                 'message',
-                'errors' => ['email', 'name', 'password', 'user'],
+                'errors' => ['email', 'password', 'user'],
             ]);
 
         $api = str_replace(':id', $this->userAuth->{User::ID}, $this->api);
 
         // Data min and max
         $data = $this->payload;
-        $data['name'] = Str::random(256);
         $data['password'] = Str::random(7);
         $this->putJson($api, $data)
             ->assertStatus(422)
             ->assertJsonStructure([
                 'message',
-                'errors' => ['name', 'password'],
+                'errors' => ['password'],
             ]);
 
         // Data invalid email

@@ -34,7 +34,6 @@ class AuthRefreshApiTest extends ApiTestCase
                     'expires_at',
                     'user' => [
                         'id',
-                        'name',
                         'email',
                     ]
                 ],
@@ -42,7 +41,6 @@ class AuthRefreshApiTest extends ApiTestCase
             ->assertJsonPath('message', __('OK'))
             ->assertJsonPath('data.user', [
                 'id' => $user->{User::ID},
-                'name' => $user->{User::NAME},
                 'email' => $user->{User::EMAIL},
             ]);
     }

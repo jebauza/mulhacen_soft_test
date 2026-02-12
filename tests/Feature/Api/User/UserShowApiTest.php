@@ -41,7 +41,6 @@ class UserShowApiTest extends ApiTestCase
                 'message',
                 'data' => [
                     'id',
-                    'name',
                     'email',
                 ],
             ])

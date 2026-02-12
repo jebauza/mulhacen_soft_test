@@ -44,7 +44,6 @@ class UserCursorPaginateApiTest extends ApiTestCase
                 'data' => [
                     '*' => [
                         'id',
-                        'name',
                         'email',
                     ]
                 ],

@@ -13,7 +13,6 @@ class RegisterRequest extends ApiRequest
     {
         return [
             CreateUserDTO::EMAIL => 'required|email|unique:' . User::TABLE . ',' . User::EMAIL,
-            CreateUserDTO::NAME => 'required|string|max:255',
             CreateUserDTO::PASSWORD => 'required|string|min:8'
         ];
     }

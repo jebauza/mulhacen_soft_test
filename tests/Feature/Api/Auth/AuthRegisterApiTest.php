@@ -38,20 +38,17 @@ class AuthRegisterApiTest extends ApiTestCase
                     'expires_at',
                     'user' => [
                         'id',
-                        'name',
                         'email',
                     ]
                 ]
             ])
             ->assertJsonPath('message', __('User registered successfully'))
-            ->assertJsonPath('data.user.name', $this->payload['name'])
             ->assertJsonPath('data.user.email', $this->payload['email']);
 
         // Database verification
         $this->assertDatabaseHas(User::TABLE, [
             User::ID => $response->json('data.user.id'),
             User::EMAIL => $this->payload['email'],
-            User::NAME => $this->payload['name'],
         ]);
 
         // Verify that the password field was not saved as plain text
@@ -69,18 +66,17 @@ class AuthRegisterApiTest extends ApiTestCase
             ->assertJsonPath('message', __('Validation errors'))
             ->assertJsonStructure([
                 'message',
-                'errors' => ['email', 'name', 'password'],
+                'errors' => ['email', 'password'],
             ]);
 
         // Data string
         $data = $this->payload;
-        $data['name'] = 4;
         $data['password'] = 10000000;
         $this->postJson($this->api, $data)
             ->assertStatus(422)
             ->assertJsonStructure([
                 'message',
-                'errors' => ['name', 'password'],
+                'errors' => ['password'],
             ]);
 
         // Data min and max
@@ -91,7 +87,7 @@ class AuthRegisterApiTest extends ApiTestCase
             ->assertStatus(422)
             ->assertJsonStructure([
                 'message',
-                'errors' => ['name', 'password'],
+                'errors' => ['password'],
             ]);
 
         // Invalid email

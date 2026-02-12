@@ -1,0 +1,49 @@
+<?php
+
+namespace App\Modules\Appointment\Requests;
+
+use App\Common\Requests\ApiRequest;
+use App\Modules\User\Models\Dentist;
+use App\Modules\Patient\Models\Patient;
+use App\Modules\Treatment\Models\Treatment;
+use App\Modules\Appointment\DTOs\CreateAppointmentDTO;
+use App\Modules\Appointment\Repositories\AppointmentRepository;
+
+class StoreAppointmentRequest extends ApiRequest
+{
+    public function rules(): array
+    {
+        return [
+            CreateAppointmentDTO::PATIENT_ID => 'required|UUID|exists:' . Patient::TABLE . ',' . Patient::ID,
+            CreateAppointmentDTO::DENTIST_ID => 'required|UUID|exists:' . Dentist::TABLE . ',' . Dentist::ID,
+            CreateAppointmentDTO::STAR => 'required|date_format:Y-m-d H:i:s',
+            CreateAppointmentDTO::END => 'required|date_format:Y-m-d H:i:s',
+            CreateAppointmentDTO::DURATION => 'required|integer',
+
+            CreateAppointmentDTO::TREATMENT_IDS => 'present|array',
+            CreateAppointmentDTO::TREATMENT_IDS . '.*' => 'uuid',
+        ];
+    }
+
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            if (empty($validator->errors()->all())) {
+                $this->checkTreatment($validator);
+            }
+        });
+    }
+
+    public function checkTreatment($validator): void
+    {
+        $validIds = Treatment::whereIn(Treatment::ID, $this->{CreateAppointmentDTO::TREATMENT_IDS})->pluck(Treatment::ID);
+        $notValidIds = collect($this->{CreateAppointmentDTO::TREATMENT_IDS})->diff($validIds);
+
+        foreach ($notValidIds as $key => $id) {
+            $validator->errors()->add(
+                CreateAppointmentDTO::TREATMENT_IDS . ".$key",
+                "The treatment ($id) is not valid."
+            );
+        }
+    }
+}

@@ -5,9 +5,11 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Database\Seeders\DentistSeeder;
+use Database\Seeders\PatientSeeder;
 use Database\Seeders\UserFakeSeeder;
 use Database\Seeders\SpecialtySeeder;
 use Database\Seeders\TreatmentSeeder;
+use Database\Seeders\AppointmentSeeder;
 
 class AppInitCommand extends Command
 {
@@ -74,6 +76,8 @@ class AppInitCommand extends Command
         $this->call(self::DB_SEED, ['class' => SpecialtySeeder::class]);
         $this->call(self::DB_SEED, ['class' => TreatmentSeeder::class]);
         $this->call(self::DB_SEED, ['class' => DentistSeeder::class]);
+        $this->call(self::DB_SEED, ['class' => PatientSeeder::class]);
+        $this->call(self::DB_SEED, ['class' => AppointmentSeeder::class]);
     }
 
     private function createDataBaseTesting(): void

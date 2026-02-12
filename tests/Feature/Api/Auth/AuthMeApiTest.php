@@ -29,7 +29,6 @@ class AuthMeApiTest extends ApiTestCase
                 'message' => __('OK'),
                 'data' => [
                     'id' => $user->{User::ID},
-                    'name' => $user->{User::NAME},
                     'email' => $user->{User::EMAIL},
                 ],
             ]);

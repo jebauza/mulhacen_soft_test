@@ -5,6 +5,8 @@ use App\Modules\Auth\Controllers\Api\AuthApiController;
 use App\Modules\User\Controllers\Api\UserApiController;
 use App\Modules\User\Controllers\Api\UserPaginateApiController;
 use App\Modules\Patient\Controllers\Api\StorePatientApiController;
+use App\Modules\Appointment\Controllers\Api\IndexAppointmentApiController;
+use App\Modules\Appointment\Controllers\Api\StoreAppointmentApiController;
 
 Route::get('/', function () {
     return response()->json(['message' => 'Hello world!']);
@@ -35,5 +37,9 @@ Route::middleware('api')->group(function () {
 
         // Patients
         Route::post('/patients', StorePatientApiController::class)->name('patients.store');
+
+        // Appointments
+        Route::post('/appointments', StoreAppointmentApiController::class)->name('appointments.store');
+        Route::get('/appointments/days', IndexAppointmentApiController::class)->name('appointments.index');
     });
 });

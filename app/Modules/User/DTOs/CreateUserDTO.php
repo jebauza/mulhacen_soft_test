@@ -5,20 +5,17 @@ namespace App\Modules\User\DTOs;
 class CreateUserDTO
 {
     const EMAIL = 'email';
-    const NAME = 'name';
     const PASSWORD = 'password';
 
     public function __construct(
         public readonly string $email,
-        public readonly string $name,
         public string $password,
     ) {}
 
-    public function toArray(bool $onlyUser = false): array
+    public function toArray(bool $onlyModel = false): array
     {
         $data = [
             self::EMAIL         => $this->email,
-            self::NAME          => $this->name,
             self::PASSWORD      => $this->password,
         ];
 
@@ -29,7 +26,6 @@ class CreateUserDTO
     {
         return new self(
             email: $request->{self::EMAIL},
-            name: $request->{self::NAME},
             password: $request->{self::PASSWORD},
         );
     }

@@ -8,6 +8,9 @@ use Illuminate\Database\Seeder;
 use Database\Seeders\SpecialtySeeder;
 use Database\Seeders\TreatmentSeeder;
 use Database\Seeders\DentistSeeder;
+use Database\Seeders\PatientSeeder;
+use Database\Seeders\AppointmentSeeder;
+use Database\Seeders\DentistSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -31,5 +34,9 @@ class DatabaseSeeder extends Seeder
         $this->call(TreatmentSeeder::class);
         // Seed dentists (requires specialties)
         $this->call(DentistSeeder::class);
+        // Seed patients
+        $this->call(PatientSeeder::class);
+        // Seed appointments (requires patients and dentists)
+        $this->call(AppointmentSeeder::class);
     }
 }

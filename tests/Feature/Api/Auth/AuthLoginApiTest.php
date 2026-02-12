@@ -40,7 +40,6 @@ class AuthLoginApiTest extends ApiTestCase
                     'expires_at',
                     'user' => [
                         'id',
-                        'name',
                         'email',
                     ]
                 ]

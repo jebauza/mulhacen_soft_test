@@ -24,6 +24,8 @@ return new class extends Migration
             $table->smallInteger('duration');
 
             $table->timestamps();
+
+            $table->unique(['patient_id', 'dentist_id', 'start', 'end']);
         });
     }
 

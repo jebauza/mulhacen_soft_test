@@ -132,7 +132,7 @@ class AuthApiController extends ApiController
         $user = $this->service->me();
 
         return ApiResponse::successData(
-            $user->only(User::ID, User::NAME, User::EMAIL)
+            $user->only(User::ID, User::EMAIL)
         );
     }
 
@@ -219,7 +219,7 @@ class AuthApiController extends ApiController
             'token_type' => 'bearer',
             'expires_in' => $ttl * 60,
             'expires_at' => now()->addMinutes($ttl)->toDateTimeString(),
-            'user' => $dto->user->only(User::ID, User::NAME, User::EMAIL),
+            'user' => $dto->user->only(User::ID, User::EMAIL),
         ];
     }
 }
