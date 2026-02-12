@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Modules\Auth\Controllers\Api\AuthApiController;
 use App\Modules\User\Controllers\Api\UserApiController;
 use App\Modules\User\Controllers\Api\UserPaginateApiController;
+use App\Modules\Patient\Controllers\Api\StorePatientApiController;
 
 Route::get('/', function () {
     return response()->json(['message' => 'Hello world!']);
@@ -23,12 +24,16 @@ Route::middleware('api')->group(function () {
     });
 
     Route::middleware('auth:api')->group(function () {
-        // Users routes
+
+        // Users
         Route::name('')->group(function () {
             Route::get('/users/paginate', [UserPaginateApiController::class, 'paginate'])->name('users.paginate');
             Route::get('/users/offset-paginate', [UserPaginateApiController::class, 'offsetPaginate'])->name('users.offset-paginate');
             Route::get('/users/cursor-paginate', [UserPaginateApiController::class, 'cursorPaginate'])->name('users.cursor-paginate');
             Route::apiResource('users', UserApiController::class);
         });
+
+        // Patients
+        Route::post('/patients', StorePatientApiController::class)->name('patients.store');
     });
 });
