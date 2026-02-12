@@ -24,7 +24,7 @@ class PatientStoreApiTest extends ApiTestCase
         parent::setUp();
         $this->patientRepo = new PatientRepository(new Patient);
 
-        $userAuth = User::factory()->create();
+        $userAuth = $this->superAdmin();
         $this->token = $this->getAccessToken($userAuth);
         $this->payload = [
             "name" => "John Doe",

@@ -3,9 +3,9 @@
 namespace Tests\Feature\Api;
 
 use App\Modules\User\Models\User;
-use Database\Seeders\UserFakeSeeder;
-use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
+use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 
 abstract class ApiTestCase extends BaseTestCase
 {
@@ -21,12 +21,12 @@ abstract class ApiTestCase extends BaseTestCase
     {
         parent::setUp();
 
-        // $this->seed(UserFakeSeeder::class);
+        $this->seed(DatabaseSeeder::class);
     }
 
     protected function superAdminEmail(): string
     {
-        return 'superadmin@example.com';
+        return 'recepcionista@pruebasmulhacen.com';
     }
 
     protected function superAdminPassword(): string
@@ -67,10 +67,7 @@ abstract class ApiTestCase extends BaseTestCase
         ])
             ->assertNotFound()
             ->assertJson([
-                'message' => __('Not Found'),
-                'errors' => [
-                    'resource' => [__('The requested resource does not exist')],
-                ],
+                'message' => __('The requested resource does not exist')
             ]);
     }
 

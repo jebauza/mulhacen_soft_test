@@ -22,7 +22,6 @@ class UpdateUserRequest extends ApiRequest
 
         return [
             UpdateUserDTO::EMAIL => 'required|email|unique:' . User::TABLE . ',' . User::EMAIL . ',' . $this->userId,
-            UpdateUserDTO::NAME => 'required|string|max:255',
             UpdateUserDTO::PASSWORD => 'required|string|min:8',
         ];
     }

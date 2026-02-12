@@ -10,7 +10,6 @@ class UpdateUserDTO
 
     public function __construct(
         public readonly string $email,
-        public readonly string $name,
         public string $password,
     ) {}
 
@@ -18,7 +17,6 @@ class UpdateUserDTO
     {
         $data = [
             self::EMAIL         => $this->email,
-            self::NAME          => $this->name,
             self::PASSWORD      => $this->password,
         ];
 
@@ -29,7 +27,6 @@ class UpdateUserDTO
     {
         return new self(
             email: $request->{self::EMAIL},
-            name: $request->{self::NAME},
             password: $request->{self::PASSWORD},
         );
     }
