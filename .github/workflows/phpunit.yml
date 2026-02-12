@@ -1,0 +1,43 @@
+name: Laravel PHPUnit CI
+
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    branches: [develop, main]
+
+jobs:
+  phpunit:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Clone the repository
+      - uses: actions/checkout@v3
+
+      # 2. Set up PHP with required extensions
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          extensions: mbstring, bcmath, pdo, sqlite, intl, xml
+
+      # 3. Install Composer dependencies
+      - run: composer install --prefer-dist --no-interaction --optimize-autoloader
+
+      # 4. Create .env file and generate app key
+      - run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      # 5. Run PHPUnit (example, currently commented)
+      # - run: ./vendor/bin/phpunit --log-junit junit.xml
+      #   env:
+      #     APP_ENV: testing
+      #     DB_CONNECTION: sqlite
+      #     DB_DATABASE: ':memory:'
+
+      # 6. Upload test results (example, currently commented)
+      # - uses: actions/upload-artifact@v4
+      #   with:
+      #     name: phpunit-report
+      #     path: junit.xml
+

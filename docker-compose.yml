@@ -7,14 +7,14 @@ services:
     container_name: "${COMPOSE_PROJECT_NAME:-base}-mariadb"
     restart: always
     environment:
-      MARIADB_DATABASE: "${COMPOSE_PROJECT_NAME:-base_db}"
+      MARIADB_DATABASE: "test_mulhacen_soft"
       MARIADB_ROOT_PASSWORD: "root"
-      MARIADB_USER: "${DB_USERNAME:-user_db}"
-      MARIADB_PASSWORD: "${DB_PASSWORD:-password_db}"
+      MARIADB_USER: "user_db"
+      MARIADB_PASSWORD: "password_db"
     ports:
       - "3306:3306"
     volumes:
-      - laravel12_db_data:/var/lib/mysql
+      - test_mulhacen_soft_db_data:/var/lib/mysql
 
   # Backend Laravel12
   backserver:
@@ -43,4 +43,4 @@ services:
       - backserver
 
 volumes:
-  laravel12_db_data:
+  test_mulhacen_soft_db_data:
