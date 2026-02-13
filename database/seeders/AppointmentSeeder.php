@@ -42,6 +42,7 @@ class AppointmentSeeder extends Seeder
                 'start' => $start,
                 'end' => $end,
                 'duration' => $duration,
+                'reason' => fake()->sentence(),
             ]);
 
             // attach 1-3 random treatments to this appointment

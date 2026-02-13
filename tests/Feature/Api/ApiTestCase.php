@@ -71,6 +71,19 @@ abstract class ApiTestCase extends BaseTestCase
             ]);
     }
 
+    protected function assertEndpointReturnsForbidden(string $method, string $api, ?string $token = null, array $data = []): void
+    {
+        $token = $token ?? $this->getAccessToken(User::factory()->create());
+
+        $this->json(strtoupper($method), $api, $data, [
+            'Authorization' => "Bearer {$token}",
+        ])
+            ->assertForbidden()
+            ->assertJson([
+                'message' => __('You do not have permission to access this resource'),
+            ]);
+    }
+
     /**
      * Helper to find the most repeated substring across an array of single-word names
      *

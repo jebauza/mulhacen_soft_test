@@ -30,5 +30,20 @@ class AppServiceProvider extends ServiceProvider
 
             return null;
         });
+
+        $permissions = [
+            'patient.create',
+            'appointment.schedule',
+            'appointment.create',
+        ];
+
+        foreach ($permissions as $action) {
+            Gate::define(
+                $action,
+                function (User $user) use ($action) {
+                    return false;
+                }
+            );
+        }
     }
 }

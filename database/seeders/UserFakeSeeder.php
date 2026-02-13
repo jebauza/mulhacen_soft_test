@@ -18,9 +18,9 @@ class UserFakeSeeder extends Seeder
             'password' => Hash::make('0dHGgfh49v'),
         ]);
 
-        // $users = User::factory(20)
-        //     ->withPassword('12345678')
-        //     ->create();
+        $users = User::factory(5)
+            ->withPassword('0dHGgfh49v')
+            ->create();
 
         $this->command->info(self::class . ' is finished');
     }

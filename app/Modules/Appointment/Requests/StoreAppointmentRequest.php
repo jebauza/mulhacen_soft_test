@@ -18,7 +18,7 @@ class StoreAppointmentRequest extends ApiRequest
             CreateAppointmentDTO::DENTIST_ID => 'required|UUID|exists:' . Dentist::TABLE . ',' . Dentist::ID,
             CreateAppointmentDTO::STAR => 'required|date_format:Y-m-d H:i:s',
             CreateAppointmentDTO::END => 'required|date_format:Y-m-d H:i:s',
-            CreateAppointmentDTO::DURATION => 'required|integer',
+            CreateAppointmentDTO::DURATION => 'required|integer|min:1|max:65535',
             CreateAppointmentDTO::REASON => 'nullable|string',
 
             CreateAppointmentDTO::TREATMENT_IDS => 'present|array|min:1',

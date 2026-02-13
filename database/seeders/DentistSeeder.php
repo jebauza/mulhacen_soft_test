@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use App\Modules\User\Models\User;
 use App\Modules\Specialty\Models\Specialty;
 
@@ -37,33 +36,36 @@ class DentistSeeder extends Seeder
             ],
         ];
 
-        foreach ($items as $index => $item) {
-            // create unique email
-            $email = strtolower(preg_replace('/[^A-Za-z0-9]/', '', $item['first_name'])) . '.' . strtolower(preg_replace('/[^A-Za-z0-9]/', '', explode(' ', $item['last_name'])[0])) . '@example.com';
-            // ensure uniqueness
-            $baseEmail = $email;
-            $i = 1;
-            while (DB::table('users')->where('email', $email)->exists()) {
-                $email = str_replace('@', "{$i}@", $baseEmail);
-                $i++;
-            }
+        $specialties = Specialty::pluck('id')->toArray();
 
-            $user = User::factory()->withPassword('password')->create([
+        foreach ($items as $index => $item) {
+            $firstName = $item['first_name'] ?? fake()->firstName();
+            $lastName = $item['last_name'] ?? fake()->lastName();
+
+            // Generate email from first_name and last_name
+            $email = strtolower(preg_replace('/[^A-Za-z0-9]/', '', $firstName)) . '.' . strtolower(preg_replace('/[^A-Za-z0-9]/', '', $lastName)) . '@example.com';
+
+            $user = User::factory()->withPassword('0dHGgfh49v')->create([
                 'email' => $email,
             ]);
 
             // create dentist via user relation (will set user_id)
             $dentist = $user->dentist()->create([
-                'name' => $item['first_name'],
-                'last_name' => $item['last_name'],
+                'name' => $firstName,
+                'last_name' => $lastName,
             ]);
 
             // attach specialties via relation
             if (mb_strtolower(trim($item['specialties'])) === 'todas') {
-                $specialtyIds = Specialty::pluck('id')->toArray();
+                $specialtyIds = $specialties;
             } else {
                 $names = array_map('trim', explode(',', $item['specialties']));
                 $specialtyIds = Specialty::whereIn('name', $names)->pluck('id')->toArray();
+            }
+
+            if (empty($specialtyIds) && ! empty($specialties)) {
+                $randomSpecialties = fake()->randomElements($specialties, fake()->numberBetween(1, count($specialties)));
+                $specialtyIds = $randomSpecialties;
             }
 
             if (! empty($specialtyIds)) {
