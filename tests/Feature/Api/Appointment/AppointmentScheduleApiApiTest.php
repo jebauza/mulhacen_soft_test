@@ -29,15 +29,13 @@ class AppointmentScheduleApiApiTest extends ApiTestCase
         $this->assertEndpointRequiresAuth(self::GET, $this->api);
     }
 
-    // public function test_store_forbidden_403()
-    // {
-    //     $this->assertEndpointReturnsForbidden(
-    //         self::POST,
-    //         $this->api,
-    //         null,
-    //         $this->payload
-    //     );
-    // }
+    public function test_schedule_forbidden_403()
+    {
+        $this->assertEndpointReturnsForbidden(
+            self::GET,
+            $this->api
+        );
+    }
 
     public function test_schedule_200()
     {

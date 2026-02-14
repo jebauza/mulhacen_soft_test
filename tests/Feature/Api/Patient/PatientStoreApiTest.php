@@ -38,15 +38,14 @@ class PatientStoreApiTest extends ApiTestCase
         $this->assertEndpointRequiresAuth(self::POST, $this->api);
     }
 
-    // public function test_store_forbidden_403()
-    // {
-    //     $this->assertEndpointReturnsForbidden(
-    //         self::POST,
-    //         $this->api,
-    //         null,
-    //         $this->payload
-    //     );
-    // }
+    public function test_store_forbidden_403()
+    {
+        $this->assertEndpointReturnsForbidden(
+            self::POST,
+            $this->api,
+            $this->payload
+        );
+    }
 
     public function test_store_201()
     {

@@ -17,7 +17,7 @@ class AppointmentService
     ) {}
 
     /**
-     * * @return Collection<int, DateScheduleDTO>
+     * @return Collection<int, DateScheduleDTO>
      */
     public function schedule(): Collection
     {
