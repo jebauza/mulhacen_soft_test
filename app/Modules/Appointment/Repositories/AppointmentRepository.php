@@ -3,8 +3,9 @@
 namespace App\Modules\Appointment\Repositories;
 
 use App\Common\Repositories\BaseRepository;
-use Illuminate\Database\Eloquent\Collection;
 use App\Modules\Appointment\Models\Appointment;
+use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Collection;
 
 class AppointmentRepository extends BaseRepository
 {
@@ -20,6 +21,16 @@ class AppointmentRepository extends BaseRepository
             // 'dentist',
             'treatments',
         ])
+            ->orderBy(Appointment::START)
+            ->get();
+    }
+
+    public function getScheduledAppointments(): Collection
+    {
+        return $this->model->with([
+            'treatments',
+        ])
+            ->whereDate(Appointment::START, '>=', CarbonImmutable::now())
             ->orderBy(Appointment::START)
             ->get();
     }

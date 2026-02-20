@@ -23,7 +23,7 @@ class AppointmentService
     {
         Gate::authorize('appointment.schedule');
 
-        $data = $this->appointmentRepo->all()
+        $data = $this->appointmentRepo->getScheduledAppointments()
             ->groupBy(function ($appointment) {
                 return $appointment->{Appointment::START}->format('Y-m-d');
             })

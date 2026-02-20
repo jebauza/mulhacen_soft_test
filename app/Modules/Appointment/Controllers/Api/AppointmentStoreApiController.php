@@ -11,7 +11,7 @@ use App\Modules\Appointment\Services\AppointmentService;
 use App\Modules\Appointment\Resources\AppointmentResource;
 use App\Modules\Appointment\Requests\StoreAppointmentRequest;
 
-class StoreAppointmentApiController extends ApiController
+class AppointmentStoreApiController extends ApiController
 {
     /**
      * @lrd:start

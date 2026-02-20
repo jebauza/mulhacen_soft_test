@@ -1,7 +1,7 @@
 <?php
 
 use App\Modules\Appointment\Controllers\Api\AppointmentScheduleApiController;
-use App\Modules\Appointment\Controllers\Api\StoreAppointmentApiController;
+use App\Modules\Appointment\Controllers\Api\AppointmentStoreApiController;
 use App\Modules\Auth\Controllers\Api\AuthApiController;
 use App\Modules\Patient\Controllers\Api\StorePatientApiController;
 use App\Modules\User\Controllers\Api\UserApiController;
@@ -39,7 +39,7 @@ Route::middleware('api')->group(function () {
         Route::post('/patients', StorePatientApiController::class)->name('patients.store');
 
         // Appointments
-        Route::post('/appointments', StoreAppointmentApiController::class)->name('appointments.store');
+        Route::post('/appointments', AppointmentStoreApiController::class)->name('appointments.store');
         Route::get('/appointments/schedule', AppointmentScheduleApiController::class)->name('appointments.schedule');
     });
 });

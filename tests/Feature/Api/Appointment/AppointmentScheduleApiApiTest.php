@@ -39,7 +39,7 @@ class AppointmentScheduleApiApiTest extends ApiTestCase
 
     public function test_schedule_200()
     {
-        $response = $this->withHeaders(['Authorization' => "Bearer {$this->token}",])
+        $this->withHeaders(['Authorization' => "Bearer {$this->token}",])
             ->getJson($this->api)
             ->assertOk()
             ->assertJsonStructure([
